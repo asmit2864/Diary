@@ -1,0 +1,57 @@
+.notes-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 12px 110px;
+  scrollbar-width: none;
+}
+.notes-area::-webkit-scrollbar { display: none; }
+
+.notes-grid {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.notes-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.state-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+}
+
+.state-icon {
+  font-size: 44px;
+  display: block;
+  margin-bottom: 14px;
+  opacity: 0.5;
+}
+
+.state-msg p {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: rgba(255,255,255,0.8);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
