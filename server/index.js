@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 
 const notesRouter = require('./routes/notes');
 const authRouter  = require('./routes/auth');
@@ -11,30 +12,36 @@ const authRouter  = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+// CORS — allow same-origin in production, localhost in dev
+const allowedOrigin = process.env.NODE_ENV === 'production'
+  ? false           // same-origin requests don't need CORS
+  : 'http://localhost:3000';
+
+app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes
+// API Routes
 app.use('/auth', authRouter);
 app.use('/api/notes', notesRouter);
 
-// Serve React build (works in both prod and dev if build exists)
-const buildDir = path.join(__dirname, '../client/build');
-app.use(express.static(buildDir));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(buildDir, 'index.html'));
-});
+// Serve React build
+const buildDir = path.resolve(__dirname, '../client/build');
+if (fs.existsSync(buildDir)) {
+  app.use(express.static(buildDir));
+  app.get('*', (req, res) => {
+    const indexPath = path.join(buildDir, 'index.html');
+    res.sendFile(indexPath);
+  });
+} else {
+  app.get('/', (req, res) => res.json({ status: 'API running — no client build found' }));
+}
 
-// Connect to MongoDB then start server
+// Start server immediately so Render health check passes
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
-  });
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch((err) => console.error('❌ MongoDB connection error:', err));
