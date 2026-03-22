@@ -12,10 +12,8 @@ const authRouter  = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS — allow same-origin in production, localhost in dev
-const allowedOrigin = process.env.NODE_ENV === 'production'
-  ? false           // same-origin requests don't need CORS
-  : 'http://localhost:3000';
+// CORS — allow frontend
+const allowedOrigin = process.env.FRONTEND_URI;
 
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json());

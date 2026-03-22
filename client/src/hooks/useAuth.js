@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchMe, loginUser, registerUser, logoutUser } from '../utils/api';
+import { fetchMe, loginUser, registerUser, logoutUser, loginWithGoogle } from '../utils/api';
 
 export function useAuth() {
   const [user, setUser]       = useState(null);
@@ -29,5 +29,11 @@ export function useAuth() {
     setUser(null);
   }, []);
 
-  return { user, loading, login, register, logout };
+  const googleLogin = useCallback(async (credential) => {
+    const u = await loginWithGoogle(credential);
+    setUser(u);
+    return u;
+  }, []);
+
+  return { user, loading, login, register, logout, googleLogin };
 }

@@ -1,5 +1,6 @@
-const BASE_AUTH = '/auth';
-const BASE_NOTES = '/api/notes';
+const BACKEND_URI = process.env.REACT_APP_BACKEND_URI || '';
+const BASE_AUTH = `${BACKEND_URI}/auth`;
+const BASE_NOTES = `${BACKEND_URI}/api/notes`;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const fetchMe = async () => {
@@ -17,6 +18,18 @@ export const loginUser = async (email, password) => {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Login failed');
+  return data;
+};
+
+export const loginWithGoogle = async (credential) => {
+  const res = await fetch(BASE_AUTH + '/google', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ credential }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Google Login failed');
   return data;
 };
 

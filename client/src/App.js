@@ -11,7 +11,7 @@ import { TABS } from './utils/constants';
 import { createNote, updateNote, deleteNote } from './utils/api';
 
 export default function App() {
-  const { user, loading: authLoading, login, register, logout } = useAuth();
+  const { user, loading: authLoading, login, register, logout, googleLogin } = useAuth();
 
   const [activeTab, setActiveTab] = useState('General');
   const [editorState, setEditorState] = useState(null);
@@ -22,8 +22,10 @@ export default function App() {
 
   // ── Auth handlers ─────────────────────────────────────────────────────────
   const handleAuth = async (mode, email, password) => {
-    if (mode === 'login') await login(email, password);
+    if (mode === 'google') await googleLogin(email); // Here 'email' is actually the credential token
+    else if (mode === 'login') await login(email, password);
     else await register(email, password);
+    reload();
   };
 
   // ── Touch swipe ───────────────────────────────────────────────────────────

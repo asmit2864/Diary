@@ -2,11 +2,14 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { OAuth2Client } = require('google-auth-library');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const COOKIE_OPTS = {
   httpOnly: true,
   sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production',
+  secure: process.env.FRONTEND_URI ? process.env.FRONTEND_URI.startsWith('https') : false,
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
 
@@ -37,6 +40,39 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ id: user._id, email: user.email });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /auth/google
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    
+    // Fetch user info from Google using the access_token
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${credential}` }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to verify access token with Google');
+    }
+    
+    const payload = await response.json();
+    const { email, sub: googleId, picture: avatarUser } = payload;
+    
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({ email, googleId, avatarUser });
+    } else if (!user.googleId) {
+      user.googleId = googleId;
+      if (!user.avatarUser && avatarUser) user.avatarUser = avatarUser;
+      await user.save();
+    }
+    
+    issueToken(res, user);
+    res.json({ id: user._id, email: user.email, avatarUser: user.avatarUser });
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid Google token: ' + err.message });
   }
 });
 

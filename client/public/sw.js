@@ -1,5 +1,5 @@
-/* NoteNest Service Worker */
-const CACHE_NAME = 'notenest-v1';
+/* Diary Service Worker */
+const CACHE_NAME = 'diary-v1';
 const urlsToCache = [
   '/',
   '/static/js/main.chunk.js',

@@ -1,4 +1,4 @@
-# 📝 NoteNest
+# 📝 Diary
 
 A beautiful purple note-taking PWA built with React, Node.js, Express, and MongoDB.
 
@@ -33,7 +33,7 @@ A beautiful purple note-taking PWA built with React, Node.js, Express, and Mongo
    ```
 5. Add your database name at the end:
    ```
-   mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/notenest?retryWrites=true&w=majority
+   mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/diary?retryWrites=true&w=majority
    ```
 
 ---
@@ -50,7 +50,7 @@ cp .env.example .env
 
 Open `.env` and paste your MongoDB URI:
 ```
-MONGODB_URI=mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/notenest?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/diary?retryWrites=true&w=majority
 PORT=5000
 NODE_ENV=development
 ```
@@ -108,7 +108,7 @@ git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/notenest.git
+git remote add origin https://github.com/YOUR_USERNAME/diary.git
 git push -u origin main
 ```
 
@@ -123,7 +123,7 @@ git push -u origin main
 6. Click **Create Web Service**
 
 Render will build and deploy automatically. Your app will be live at:
-`https://notenest.onrender.com`
+`https://diary.onrender.com`
 
 ### Step 3 – Allow Render IP in MongoDB Atlas
 1. In MongoDB Atlas → **Network Access**
