@@ -16,6 +16,13 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigin = process.env.FRONTEND_URI;
 
 app.use(cors({ origin: allowedOrigin, credentials: true }));
+
+// Fix Google Auth Popup Cross-Origin-Opener-Policy issue
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
+
 app.use(express.json());
 app.use(cookieParser());
 

@@ -6,10 +6,12 @@ const { OAuth2Client } = require('google-auth-library');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const isStandardLocal = !process.env.FRONTEND_URI || process.env.FRONTEND_URI.includes('localhost');
+
 const COOKIE_OPTS = {
   httpOnly: true,
-  sameSite: 'lax',
-  secure: process.env.FRONTEND_URI ? process.env.FRONTEND_URI.startsWith('https') : false,
+  sameSite: isStandardLocal ? 'lax' : 'none',
+  secure: !isStandardLocal, // 'none' demands secure: true
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
 
