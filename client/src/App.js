@@ -1,10 +1,15 @@
 import React, { useState, useRef } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import Header from './components/Header';
-import TabBar from './components/TabBar';
+import PillNav from './components/PillNav';
 import NotesGrid from './components/NotesGrid';
+import DocumentsGrid from './components/DocumentsGrid';
+import AccountsGrid from './components/AccountsGrid';
 import FAB from './components/FAB';
 import NoteEditor from './components/NoteEditor';
+import DocumentEditor from './components/DocumentEditor';
+import AccountEditor from './components/AccountEditor';
 import AuthPage from './components/AuthPage';
 import { useNotes } from './hooks/useNotes';
 import { TABS } from './utils/constants';
@@ -13,7 +18,7 @@ import { createNote, updateNote, deleteNote } from './utils/api';
 export default function App() {
   const { user, loading: authLoading, login, register, logout, googleLogin } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('General');
+  const [activeTab, setActiveTab] = useState('Notes');
   const [editorState, setEditorState] = useState(null);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const selectionMode = selectedIds.size > 0;
@@ -62,30 +67,29 @@ export default function App() {
   });
   const handleCancelSelection = () => setSelectedIds(new Set());
   const handleDeleteSelected = async () => {
-    try { await Promise.all([...selectedIds].map(deleteNote)); }
+    try { await Promise.all([...selectedIds].map(id => deleteNote(id, activeTab))); }
     catch (e) { console.error(e); }
     setSelectedIds(new Set());
     reload();
   };
 
   const handleFabSelect = async (category) => {
-    setActiveTab(category);
     try {
       const newNote = await createNote({ title: '', body: '', category });
       setEditorState({ note: newNote, category, rect: null });
     } catch (e) { console.error(e); }
   };
 
-  const handleSave = async ({ title, body }) => {
+  const handleSave = async ({ title, body, accountId, accountPassword }) => {
     if (!editorState?.note?._id) return;
     try {
-      await updateNote(editorState.note._id, { title, body, category: editorState.category });
+      await updateNote(editorState.note._id, { title, body, accountId, accountPassword, category: editorState.category });
     } catch (e) { console.error(e); }
   };
 
   const handleDelete = async () => {
     if (!editorState?.note?._id) return;
-    try { await deleteNote(editorState.note._id); } catch (e) { console.error(e); }
+    try { await deleteNote(editorState.note._id, editorState.category); } catch (e) { console.error(e); }
     setEditorState(null);
     reload();
   };
@@ -93,37 +97,92 @@ export default function App() {
   const handleClose = () => { setEditorState(null); reload(); };
 
   // ── Render ────────────────────────────────────────────────────────────────
-  if (authLoading) return <div className="auth-loading"><div className="spinner" /></div>;
+  if (authLoading) return <div className="flex items-center justify-center h-[100dvh]"><Loader2 className="w-8 h-8 animate-spin text-white/70" /></div>;
   if (!user) return <AuthPage onAuth={handleAuth} />;
 
   return (
     <>
       <Header user={user} onLogout={logout} />
-      <TabBar activeTab={activeTab} onTabChange={selectionMode ? undefined : setActiveTab} />
+      
+      <PillNav activeTab={activeTab} onTabChange={selectionMode ? undefined : setActiveTab} />
 
-      <NotesGrid
-        notes={notes}
-        loading={loading}
-        error={error}
-        onNoteClick={handleNoteClick}
-        onNoteLongPress={handleNoteLongPress}
-        onNoteToggleSelect={handleNoteToggleSelect}
-        selectionMode={selectionMode}
-        selectedIds={selectedIds}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      />
+      {activeTab === 'Notes' && (
+        <NotesGrid
+          notes={notes}
+          loading={loading}
+          error={error}
+          onNoteClick={handleNoteClick}
+          onNoteLongPress={handleNoteLongPress}
+          onNoteToggleSelect={handleNoteToggleSelect}
+          selectionMode={selectionMode}
+          selectedIds={selectedIds}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        />
+      )}
+
+      {activeTab === 'Documents' && (
+        <DocumentsGrid
+          documents={notes}
+          loading={loading}
+          error={error}
+          onDocumentClick={handleNoteClick}
+          onDocumentLongPress={handleNoteLongPress}
+          onDocumentToggleSelect={handleNoteToggleSelect}
+          selectionMode={selectionMode}
+          selectedIds={selectedIds}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        />
+      )}
+
+      {activeTab === 'Accounts' && (
+        <AccountsGrid
+          accounts={notes}
+          loading={loading}
+          error={error}
+          onAccountClick={handleNoteClick}
+          onAccountLongPress={handleNoteLongPress}
+          onAccountToggleSelect={handleNoteToggleSelect}
+          selectionMode={selectionMode}
+          selectedIds={selectedIds}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        />
+      )}
 
       <FAB
-        onCategorySelect={handleFabSelect}
+        onAdd={() => handleFabSelect(activeTab)}
         selectionMode={selectionMode}
         selectedCount={selectedIds.size}
         onDeleteSelected={handleDeleteSelected}
         onCancelSelection={handleCancelSelection}
       />
 
-      {editorState && (
+      {editorState && editorState.category === 'Notes' && (
         <NoteEditor
+          note={editorState.note}
+          category={editorState.category}
+          cardRect={editorState.rect}
+          onClose={handleClose}
+          onSave={handleSave}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {editorState && editorState.category === 'Documents' && (
+        <DocumentEditor
+          note={editorState.note}
+          category={editorState.category}
+          cardRect={editorState.rect}
+          onClose={handleClose}
+          onSave={handleSave}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {editorState && editorState.category === 'Accounts' && (
+        <AccountEditor
           note={editorState.note}
           category={editorState.category}
           cardRect={editorState.rect}

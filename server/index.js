@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,16 +6,20 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
 
-const notesRouter = require('./routes/notes');
-const authRouter  = require('./routes/auth');
+const notesRouter    = require('./routes/notes');
+const documentsRouter = require('./routes/documents');
+const accountsRouter  = require('./routes/accounts');
+const authRouter     = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS — allow frontend
-const allowedOrigin = process.env.FRONTEND_URI;
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.FRONTEND_URI] 
+  : [process.env.FRONTEND_URI, 'http://localhost:3000', 'http://127.0.0.1:3000'];
 
-app.use(cors({ origin: allowedOrigin, credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 // Fix Google Auth Popup Cross-Origin-Opener-Policy issue
 app.use((req, res, next) => {
@@ -29,6 +33,8 @@ app.use(cookieParser());
 // API Routes
 app.use('/auth', authRouter);
 app.use('/api/notes', notesRouter);
+app.use('/api/documents', documentsRouter);
+app.use('/api/accounts', accountsRouter);
 
 // Serve React build
 const buildDir = path.resolve(__dirname, '../client/build');

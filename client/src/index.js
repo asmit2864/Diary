@@ -13,8 +13,8 @@ root.render(
   </React.StrictMode>
 );
 
-// Register PWA Service Worker
-if ('serviceWorker' in navigator) {
+// Register PWA Service Worker only in production to prevent caching issues in development
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')

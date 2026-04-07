@@ -1,52 +1,52 @@
 const express = require('express');
 const router = express.Router();
-const Note = require('../models/Note');
+const Document = require('../models/Document');
 const requireAuth = require('../middleware/auth');
 
 // All routes require auth
 router.use(requireAuth);
 
-// GET all notes
+// GET all documents
 router.get('/', async (req, res) => {
   try {
     const filter = { archived: false, userId: req.user.id };
-    const notes = await Note.find(filter).sort({ pinned: -1, updatedAt: -1 });
-    res.json(notes);
+    const documents = await Document.find(filter).sort({ pinned: -1, updatedAt: -1 });
+    res.json(documents);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// GET single note
+// GET single document
 router.get('/:id', async (req, res) => {
   try {
-    const note = await Note.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!note) return res.status(404).json({ message: 'Note not found' });
-    res.json(note);
+    const document = await Document.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!document) return res.status(404).json({ message: 'Document not found' });
+    res.json(document);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST create note
+// POST create document
 router.post('/', async (req, res) => {
   try {
-    const note = new Note({
+    const document = new Document({
       title: req.body.title || '',
       body: req.body.body || '',
       userId: req.user.id,
     });
-    const saved = await note.save();
+    const saved = await document.save();
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// PUT update note
+// PUT update document
 router.put('/:id', async (req, res) => {
   try {
-    const updated = await Note.findOneAndUpdate(
+    const updated = await Document.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       {
         title: req.body.title,
@@ -56,19 +56,19 @@ router.put('/:id', async (req, res) => {
       },
       { new: true, runValidators: true }
     );
-    if (!updated) return res.status(404).json({ message: 'Note not found' });
+    if (!updated) return res.status(404).json({ message: 'Document not found' });
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// DELETE note
+// DELETE document
 router.delete('/:id', async (req, res) => {
   try {
-    const deleted = await Note.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
-    if (!deleted) return res.status(404).json({ message: 'Note not found' });
-    res.json({ message: 'Note deleted' });
+    const deleted = await Document.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    if (!deleted) return res.status(404).json({ message: 'Document not found' });
+    res.json({ message: 'Document deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

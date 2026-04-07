@@ -1,6 +1,5 @@
 const BACKEND_URI = process.env.REACT_APP_BACKEND_URI || '';
 const BASE_AUTH = `${BACKEND_URI}/auth`;
-const BASE_NOTES = `${BACKEND_URI}/api/notes`;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const fetchMe = async () => {
@@ -49,43 +48,47 @@ export const logoutUser = async () => {
   await fetch(BASE_AUTH + '/logout', { method: 'POST', credentials: 'include' });
 };
 
-// ── Notes ─────────────────────────────────────────────────────────────────────
+// ── Notes/Documents/Accounts Dynamism ─────────────────────────────────────────
+
+const getEndpoint = (category) => {
+  if (category === 'Documents') return `${BACKEND_URI}/api/documents`;
+  if (category === 'Accounts') return `${BACKEND_URI}/api/accounts`;
+  return `${BACKEND_URI}/api/notes`;
+};
+
 export const fetchNotes = async (category) => {
-  const url = category
-    ? `${BASE_NOTES}?category=${encodeURIComponent(category)}`
-    : BASE_NOTES;
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch notes');
+  const res = await fetch(getEndpoint(category), { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch ${category}`);
   return res.json();
 };
 
 export const createNote = async (data) => {
-  const res = await fetch(BASE_NOTES, {
+  const res = await fetch(getEndpoint(data.category), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to create note');
+  if (!res.ok) throw new Error('Failed to create item');
   return res.json();
 };
 
 export const updateNote = async (id, data) => {
-  const res = await fetch(`${BASE_NOTES}/${id}`, {
+  const res = await fetch(`${getEndpoint(data.category)}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update note');
+  if (!res.ok) throw new Error('Failed to update item');
   return res.json();
 };
 
-export const deleteNote = async (id) => {
-  const res = await fetch(`${BASE_NOTES}/${id}`, {
+export const deleteNote = async (id, category) => {
+  const res = await fetch(`${getEndpoint(category)}/${id}`, {
     method: 'DELETE',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Failed to delete note');
+  if (!res.ok) throw new Error('Failed to delete item');
   return res.json();
 };

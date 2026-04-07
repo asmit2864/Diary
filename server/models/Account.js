@@ -1,16 +1,20 @@
 const mongoose = require('mongoose');
 
-const noteSchema = new mongoose.Schema(
+const accountSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       default: '',
       trim: true,
     },
-    body: {
+    accountId: {
       type: String,
       default: '',
       trim: true,
+    },
+    accountPassword: {
+      type: String,
+      default: '',
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -31,4 +35,4 @@ const noteSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Note', noteSchema);
+module.exports = mongoose.model('Account', accountSchema);

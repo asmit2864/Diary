@@ -11,7 +11,8 @@ export function useNotes(category) {
       setLoading(true);
       setError(null);
       const data = await fetchNotes(category);
-      setNotes(data);
+      // Inject category since backend models no longer store it
+      setNotes(data.map(item => ({ ...item, category })));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -25,18 +26,18 @@ export function useNotes(category) {
 
   const addNote = async (data) => {
     const note = await createNote({ ...data, category });
-    setNotes((prev) => [note, ...prev]);
+    setNotes((prev) => [{ ...note, category }, ...prev]);
     return note;
   };
 
   const editNote = async (id, data) => {
     const updated = await updateNote(id, data);
-    setNotes((prev) => prev.map((n) => (n._id === id ? updated : n)));
+    setNotes((prev) => prev.map((n) => (n._id === id ? { ...updated, category } : n)));
     return updated;
   };
 
   const removeNote = async (id) => {
-    await deleteNote(id);
+    await deleteNote(id, category);
     setNotes((prev) => prev.filter((n) => n._id !== id));
   };
 
