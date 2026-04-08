@@ -99,12 +99,14 @@ router.post('/login', async (req, res) => {
 });
 
 // GET /auth/me
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
   const token = req.cookies?.token;
   if (!token) return res.status(401).json({ message: 'Not authenticated' });
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ id: payload.id, email: payload.email });
+    const user = await User.findById(payload.id);
+    if (!user) return res.status(401).json({ message: 'User not found' });
+    res.json({ id: user._id, email: user.email, avatarUser: user.avatarUser, hasVaultPin: !!user.vaultPin });
   } catch {
     res.status(401).json({ message: 'Invalid or expired token' });
   }
@@ -114,6 +116,52 @@ router.get('/me', (req, res) => {
 router.post('/logout', (req, res) => {
   res.clearCookie('token', { ...COOKIE_OPTS, maxAge: 0 });
   res.json({ message: 'Logged out' });
+});
+
+// POST /auth/set-pin
+router.post('/set-pin', async (req, res) => {
+  const token = req.cookies?.token;
+  if (!token) return res.status(401).json({ message: 'Not authenticated' });
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const { pin } = req.body;
+    if (!pin || pin.length !== 6) return res.status(400).json({ message: '6-digit PIN required' });
+    
+    const user = await User.findById(payload.id);
+    if (!user) return res.status(401).json({ message: 'User not found' });
+    if (user.vaultPin) return res.status(400).json({ message: 'Vault PIN already set' });
+    
+    const bcrypt = require('bcryptjs');
+    user.vaultPin = await bcrypt.hash(pin, 12);
+    await user.save();
+    
+    res.json({ message: 'Vault PIN set' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /auth/verify-pin
+router.post('/verify-pin', async (req, res) => {
+  const token = req.cookies?.token;
+  if (!token) return res.status(401).json({ message: 'Not authenticated' });
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const { pin } = req.body;
+    if (!pin) return res.status(400).json({ message: 'PIN required' });
+    
+    const user = await User.findById(payload.id);
+    if (!user) return res.status(401).json({ message: 'User not found' });
+    if (!user.vaultPin) return res.status(400).json({ message: 'Vault PIN not set' });
+    
+    const bcrypt = require('bcryptjs');
+    const ok = await bcrypt.compare(pin, user.vaultPin);
+    if (!ok) return res.status(401).json({ message: 'Invalid Vault PIN' });
+    
+    res.json({ message: 'Vault PIN verified' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;

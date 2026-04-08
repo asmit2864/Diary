@@ -34,6 +34,7 @@ router.post('/', async (req, res) => {
     const document = new Document({
       title: req.body.title || '',
       body: req.body.body || '',
+      documentUrl: req.body.documentUrl || '',
       userId: req.user.id,
     });
     const saved = await document.save();
@@ -51,6 +52,7 @@ router.put('/:id', async (req, res) => {
       {
         title: req.body.title,
         body: req.body.body,
+        documentUrl: req.body.documentUrl,
         pinned: req.body.pinned,
         archived: req.body.archived,
       },

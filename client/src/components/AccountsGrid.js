@@ -7,6 +7,7 @@ export default function AccountsGrid({
   onAccountClick, onAccountLongPress, onAccountToggleSelect,
   selectionMode, selectedIds,
   onTouchStart, onTouchEnd,
+  vaultKey, onUpdateInline
 }) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -44,7 +45,7 @@ export default function AccountsGrid({
       
       {/* Search Bar */}
       <div className="relative mb-4 shrink-0 mx-1">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
           <Search className="h-[18px] w-[18px] text-white/40" />
         </div>
         <input
@@ -76,6 +77,8 @@ export default function AccountsGrid({
               onToggleSelect={onAccountToggleSelect}
               selectionMode={selectionMode}
               selected={selectedIds.has(acc._id)}
+              onUpdate={onUpdateInline}
+              vaultKey={vaultKey}
             />
           ))
         )}

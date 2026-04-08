@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
     avatarUser: {
       type: String,
     },
+    vaultPin: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

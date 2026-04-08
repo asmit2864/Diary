@@ -6,7 +6,7 @@ export default function DocumentsGrid({
   documents, loading, error,
   onDocumentClick, onDocumentLongPress, onDocumentToggleSelect,
   selectionMode, selectedIds,
-  onTouchStart, onTouchEnd,
+  onTouchStart, onTouchEnd, vaultKey
 }) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -44,7 +44,7 @@ export default function DocumentsGrid({
       
       {/* Search Bar */}
       <div className="relative mb-4 shrink-0 mx-1">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
           <Search className="h-[18px] w-[18px] text-white/40" />
         </div>
         <input
@@ -76,6 +76,7 @@ export default function DocumentsGrid({
               onToggleSelect={onDocumentToggleSelect}
               selectionMode={selectionMode}
               selected={selectedIds.has(doc._id)}
+              vaultKey={vaultKey}
             />
           ))
         )}

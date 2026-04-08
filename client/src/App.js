@@ -11,6 +11,7 @@ import NoteEditor from './components/NoteEditor';
 import DocumentEditor from './components/DocumentEditor';
 import AccountEditor from './components/AccountEditor';
 import AuthPage from './components/AuthPage';
+import VaultLogin from './components/VaultLogin';
 import { useNotes } from './hooks/useNotes';
 import { TABS } from './utils/constants';
 import { createNote, updateNote, deleteNote } from './utils/api';
@@ -23,7 +24,13 @@ export default function App() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const selectionMode = selectedIds.size > 0;
 
-  const { notes, loading, error, reload } = useNotes(activeTab);
+  const [vaultUnlocked, setVaultUnlocked] = useState(false);
+  const [vaultKey, setVaultKey] = useState(null);
+
+  const isVaultTab = activeTab === 'Accounts' || activeTab === 'Documents';
+  const showVaultLogin = isVaultTab && !vaultUnlocked;
+
+  const { notes, loading, error, reload } = useNotes(activeTab, vaultKey);
 
   // ── Auth handlers ─────────────────────────────────────────────────────────
   const handleAuth = async (mode, email, password) => {
@@ -80,10 +87,17 @@ export default function App() {
     } catch (e) { console.error(e); }
   };
 
-  const handleSave = async ({ title, body, accountId, accountPassword }) => {
+  const handleSave = async ({ title, body, accountId, accountPassword, notes: accNotes, documentUrl }) => {
     if (!editorState?.note?._id) return;
     try {
-      await updateNote(editorState.note._id, { title, body, accountId, accountPassword, category: editorState.category });
+      await updateNote(editorState.note._id, { title, body, accountId, accountPassword, notes: accNotes, documentUrl, category: editorState.category });
+    } catch (e) { console.error(e); }
+  };
+
+  const handleUpdateInline = async (id, data, category) => {
+    try {
+      await updateNote(id, { ...data, category });
+      // do not implicitly reload here constantly, it can interrupt typing if focus resets. Let AccountCard handle local state optimism.
     } catch (e) { console.error(e); }
   };
 
@@ -106,58 +120,75 @@ export default function App() {
       
       <PillNav activeTab={activeTab} onTabChange={selectionMode ? undefined : setActiveTab} />
 
-      {activeTab === 'Notes' && (
-        <NotesGrid
-          notes={notes}
-          loading={loading}
-          error={error}
-          onNoteClick={handleNoteClick}
-          onNoteLongPress={handleNoteLongPress}
-          onNoteToggleSelect={handleNoteToggleSelect}
-          selectionMode={selectionMode}
-          selectedIds={selectedIds}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        />
-      )}
+      {showVaultLogin ? (
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          <VaultLogin 
+            user={user} 
+            onUnlock={(key) => { 
+              setVaultKey(key); 
+              setVaultUnlocked(true); 
+            }} 
+          />
+        </div>
+      ) : (
+        <>
+          {activeTab === 'Notes' && (
+            <NotesGrid
+              notes={notes}
+              loading={loading}
+              error={error}
+              onNoteClick={handleNoteClick}
+              onNoteLongPress={handleNoteLongPress}
+              onNoteToggleSelect={handleNoteToggleSelect}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            />
+          )}
 
-      {activeTab === 'Documents' && (
-        <DocumentsGrid
-          documents={notes}
-          loading={loading}
-          error={error}
-          onDocumentClick={handleNoteClick}
-          onDocumentLongPress={handleNoteLongPress}
-          onDocumentToggleSelect={handleNoteToggleSelect}
-          selectionMode={selectionMode}
-          selectedIds={selectedIds}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        />
-      )}
+          {activeTab === 'Documents' && (
+            <DocumentsGrid
+              documents={notes}
+              loading={loading}
+              error={error}
+              onDocumentClick={handleNoteClick}
+              onDocumentLongPress={handleNoteLongPress}
+              onDocumentToggleSelect={handleNoteToggleSelect}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              vaultKey={vaultKey}
+            />
+          )}
 
-      {activeTab === 'Accounts' && (
-        <AccountsGrid
-          accounts={notes}
-          loading={loading}
-          error={error}
-          onAccountClick={handleNoteClick}
-          onAccountLongPress={handleNoteLongPress}
-          onAccountToggleSelect={handleNoteToggleSelect}
-          selectionMode={selectionMode}
-          selectedIds={selectedIds}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        />
-      )}
+          {activeTab === 'Accounts' && (
+            <AccountsGrid
+              accounts={notes}
+              loading={loading}
+              error={error}
+              onAccountClick={handleNoteClick}
+              onAccountLongPress={handleNoteLongPress}
+              onAccountToggleSelect={handleNoteToggleSelect}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              vaultKey={vaultKey}
+              onUpdateInline={(id, data) => handleUpdateInline(id, data, activeTab)}
+            />
+          )}
 
-      <FAB
-        onAdd={() => handleFabSelect(activeTab)}
-        selectionMode={selectionMode}
-        selectedCount={selectedIds.size}
-        onDeleteSelected={handleDeleteSelected}
-        onCancelSelection={handleCancelSelection}
-      />
+          <FAB
+            onAdd={() => handleFabSelect(activeTab)}
+            selectionMode={selectionMode}
+            selectedCount={selectedIds.size}
+            onDeleteSelected={handleDeleteSelected}
+            onCancelSelection={handleCancelSelection}
+          />
+        </>
+      )}
 
       {editorState && editorState.category === 'Notes' && (
         <NoteEditor
@@ -178,6 +209,7 @@ export default function App() {
           onClose={handleClose}
           onSave={handleSave}
           onDelete={handleDelete}
+          vaultKey={vaultKey}
         />
       )}
 
@@ -189,6 +221,7 @@ export default function App() {
           onClose={handleClose}
           onSave={handleSave}
           onDelete={handleDelete}
+          vaultKey={vaultKey}
         />
       )}
     </>

@@ -48,6 +48,30 @@ export const logoutUser = async () => {
   await fetch(BASE_AUTH + '/logout', { method: 'POST', credentials: 'include' });
 };
 
+export const setVaultPin = async (pin) => {
+  const res = await fetch(BASE_AUTH + '/set-pin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ pin }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to set PIN');
+  return data;
+};
+
+export const verifyVaultPin = async (pin) => {
+  const res = await fetch(BASE_AUTH + '/verify-pin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ pin }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Verification failed');
+  return data;
+};
+
 // ── Notes/Documents/Accounts Dynamism ─────────────────────────────────────────
 
 const getEndpoint = (category) => {

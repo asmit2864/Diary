@@ -1,6 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { cn } from '../lib/utils';
-import { FileText } from 'lucide-react';
+import { FileText, Image as ImageIcon } from 'lucide-react';
+import { downloadEncryptedBlob } from '../utils/cloudinary';
+import { decryptBlob } from '../utils/crypto';
 
 const LONG_PRESS_MS = 500;
 
@@ -10,10 +12,12 @@ function formatDate(iso) {
   return `${mo[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-export default function DocumentCard({ doc, onClick, selectionMode, selected, onLongPress, onToggleSelect }) {
+export default function DocumentCard({ doc, onClick, selectionMode, selected, onLongPress, onToggleSelect, vaultKey }) {
   const timerRef = useRef(null);
   const didLongPress = useRef(false);
   const cardRef = useRef(null);
+  
+  const [thumbnailUrl, setThumbnailUrl] = useState(null);
 
   const startPress = () => {
     didLongPress.current = false;
@@ -35,12 +39,28 @@ export default function DocumentCard({ doc, onClick, selectionMode, selected, on
     }
   };
 
+  useEffect(() => {
+    let active = true;
+    if (doc.documentUrl && vaultKey && !thumbnailUrl) {
+      downloadEncryptedBlob(doc.documentUrl)
+        .then(async (blob) => {
+          if (!active) return;
+          const decBlob = await decryptBlob(blob, vaultKey);
+          if (active) setThumbnailUrl(URL.createObjectURL(decBlob));
+        })
+        .catch(err => {
+          console.error("Failed to load thumbnail", err);
+        });
+    }
+    return () => { active = false; };
+  }, [doc, vaultKey, thumbnailUrl]);
+
   return (
     <div
       ref={cardRef}
       className={cn(
-        "bg-white/10 rounded-[14px] p-4 cursor-pointer transition-all duration-150 relative select-none flex gap-4 items-center shadow-sm",
-        "active:bg-white/20 active:scale-95 hover:bg-white/15",
+        "bg-white/10 rounded-2xl overflow-hidden cursor-pointer transition-all duration-150 relative select-none flex flex-col shadow-sm border border-white/5",
+        "active:bg-white/20 active:scale-[0.98] hover:bg-white/15",
         selected && "bg-white/30 ring-2 ring-white/70 scale-[0.97]",
         selectionMode && !selected && "opacity-50"
       )}
@@ -52,25 +72,48 @@ export default function DocumentCard({ doc, onClick, selectionMode, selected, on
       onTouchEnd={cancelPress}
       onTouchMove={cancelPress}
     >
-      <div className="w-[42px] h-[42px] rounded-full bg-blue-400/20 text-[#93c5fd] flex items-center justify-center shrink-0">
-        <FileText size={20} strokeWidth={2} />
-      </div>
-      
-      <div className="flex-1 min-w-0">
-        {doc.title ? (
-          <div className="text-[16px] font-bold mb-1 leading-tight truncate text-white">{doc.title}</div>
-        ) : (
-          <div className="text-[16px] font-bold mb-1 leading-tight truncate text-white/50 italic">Untitled Document</div>
-        )}
-        
-        {doc.body && (
-          <div className="text-[13.5px] text-white/70 truncate">{doc.body}</div>
-        )}
-      </div>
-      
-      <div className="text-[12px] text-white/40 shrink-0 ml-2">
-        {formatDate(doc.updatedAt || doc.createdAt)}
-      </div>
+      {/* Conditional layout based on attachment */}
+      {(thumbnailUrl || doc.documentUrl) ? (
+        <div className="w-full aspect-[4/3] max-h-[260px] bg-black/40 flex items-center justify-center relative">
+          {thumbnailUrl ? (
+            <img src={thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover" />
+          ) : (
+            <ImageIcon size={40} strokeWidth={1.5} className="text-white/20" />
+          )}
+          
+          {/* Overlay Box */}
+          <div className="absolute bottom-2 left-2 right-2 bg-[#7b2fff]/85 backdrop-blur-md border border-white/20 rounded-xl flex items-center gap-3 py-2 px-3 shadow-lg">
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              {doc.title ? (
+                <div className="text-[14.5px] font-bold leading-tight truncate text-white">{doc.title}</div>
+              ) : (
+                <div className="text-[14.5px] font-bold leading-tight truncate text-white/70 italic">Untitled</div>
+              )}
+            </div>
+            <div className="text-[11.5px] font-medium text-white/80 shrink-0 flex items-center leading-none tracking-wide pt-0.5">
+              {formatDate(doc.updatedAt || doc.createdAt)}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 w-full flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-blue-400/20 text-[#93c5fd] flex items-center justify-center shrink-0">
+            <FileText size={18} strokeWidth={2.5} />
+          </div>
+          
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            {doc.title ? (
+              <div className="text-[17px] font-bold leading-tight truncate text-white">{doc.title}</div>
+            ) : (
+              <div className="text-[17px] font-bold leading-tight truncate text-white/50 italic">Untitled Document</div>
+            )}
+          </div>
+          
+          <div className="text-[12px] font-medium text-white/40 shrink-0 pl-2 flex items-center leading-none tracking-wide pt-0.5">
+            {formatDate(doc.updatedAt || doc.createdAt)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

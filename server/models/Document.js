@@ -10,7 +10,10 @@ const documentSchema = new mongoose.Schema(
     body: {
       type: String,
       default: '',
-      trim: true,
+    },
+    documentUrl: {
+      type: String,
+      default: '',
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

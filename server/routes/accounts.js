@@ -35,6 +35,7 @@ router.post('/', async (req, res) => {
       title: req.body.title || '',
       accountId: req.body.accountId || '',
       accountPassword: req.body.accountPassword || '',
+      notes: req.body.notes || '',
       userId: req.user.id,
     });
     const saved = await account.save();
@@ -53,6 +54,7 @@ router.put('/:id', async (req, res) => {
         title: req.body.title,
         accountId: req.body.accountId,
         accountPassword: req.body.accountPassword,
+        notes: req.body.notes,
         pinned: req.body.pinned,
         archived: req.body.archived,
       },
