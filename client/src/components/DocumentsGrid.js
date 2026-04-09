@@ -43,7 +43,7 @@ export default function DocumentsGrid({
     <div className={containerClasses} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       
       {/* Search Bar */}
-      <div className="relative mb-4 shrink-0 mx-1">
+      <div className="relative mb-4 shrink-0">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
           <Search className="h-[18px] w-[18px] text-white/40" />
         </div>

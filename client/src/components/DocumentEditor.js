@@ -217,7 +217,7 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
       className="fixed inset-0 z-[200] flex flex-col max-w-[430px] mx-auto origin-center bg-gradient-to-b from-[#7b2fff] via-[#9b44ff_40%] via-[#b06ef3_70%] to-[#d49dff] animate-expandFromCard" 
       style={animStyle}
     >
-      <div className="flex items-center px-4 pt-2.5 pb-[14px] gap-3 shrink-0">
+      <div className="flex items-center px-4 pt-4 pb-[14px] gap-3 shrink-0">
         <button 
           className="w-[38px] h-[38px] rounded-full bg-white/20 border border-white/35 text-white flex items-center justify-center cursor-pointer transition-colors backdrop-blur-md active:bg-white/30 shrink-0 hover:bg-white/25"
           onClick={handleClose}

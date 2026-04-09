@@ -2,14 +2,15 @@ import React, { useState, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import Header from './components/Header';
-import PillNav from './components/PillNav';
+import FloatingNavbar from './components/FloatingNavbar';
 import NotesGrid from './components/NotesGrid';
 import DocumentsGrid from './components/DocumentsGrid';
 import AccountsGrid from './components/AccountsGrid';
-import FAB from './components/FAB';
+import ExpensesGrid from './components/ExpensesGrid';
 import NoteEditor from './components/NoteEditor';
 import DocumentEditor from './components/DocumentEditor';
 import AccountEditor from './components/AccountEditor';
+import ExpenseEditor from './components/ExpenseEditor';
 import AuthPage from './components/AuthPage';
 import VaultLogin from './components/VaultLogin';
 import { useNotes } from './hooks/useNotes';
@@ -87,10 +88,10 @@ export default function App() {
     } catch (e) { console.error(e); }
   };
 
-  const handleSave = async ({ title, body, accountId, accountPassword, notes: accNotes, documentUrl }) => {
+  const handleSave = async ({ title, body, accountId, accountPassword, notes: accNotes, documentUrl, entries, initialTotal }) => {
     if (!editorState?.note?._id) return;
     try {
-      await updateNote(editorState.note._id, { title, body, accountId, accountPassword, notes: accNotes, documentUrl, category: editorState.category });
+      await updateNote(editorState.note._id, { title, body, accountId, accountPassword, notes: accNotes, documentUrl, entries, initialTotal, category: editorState.category });
     } catch (e) { console.error(e); }
   };
 
@@ -117,8 +118,7 @@ export default function App() {
   return (
     <>
       <Header user={user} onLogout={logout} />
-      
-      <PillNav activeTab={activeTab} onTabChange={selectionMode ? undefined : setActiveTab} />
+
 
       {showVaultLogin ? (
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
@@ -140,6 +140,21 @@ export default function App() {
               onNoteClick={handleNoteClick}
               onNoteLongPress={handleNoteLongPress}
               onNoteToggleSelect={handleNoteToggleSelect}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            />
+          )}
+
+          {activeTab === 'Expenses' && (
+            <ExpensesGrid
+              expenses={notes}
+              loading={loading}
+              error={error}
+              onExpenseClick={handleNoteClick}
+              onExpenseLongPress={handleNoteLongPress}
+              onExpenseToggleSelect={handleNoteToggleSelect}
               selectionMode={selectionMode}
               selectedIds={selectedIds}
               onTouchStart={handleTouchStart}
@@ -180,15 +195,19 @@ export default function App() {
             />
           )}
 
-          <FAB
-            onAdd={() => handleFabSelect(activeTab)}
-            selectionMode={selectionMode}
-            selectedCount={selectedIds.size}
-            onDeleteSelected={handleDeleteSelected}
-            onCancelSelection={handleCancelSelection}
-          />
         </>
       )}
+
+      {/* Floating Navbar */}
+      <FloatingNavbar 
+        activeTab={activeTab} 
+        setActiveTab={selectionMode ? undefined : setActiveTab} 
+        onAdd={handleFabSelect}
+        selectionMode={selectionMode}
+        selectedCount={selectedIds.size}
+        onDeleteSelected={handleDeleteSelected}
+        onCancelSelection={handleCancelSelection}
+      />
 
       {editorState && editorState.category === 'Notes' && (
         <NoteEditor
@@ -222,6 +241,17 @@ export default function App() {
           onSave={handleSave}
           onDelete={handleDelete}
           vaultKey={vaultKey}
+        />
+      )}
+
+      {editorState && editorState.category === 'Expenses' && (
+        <ExpenseEditor
+          note={editorState.note}
+          category={editorState.category}
+          cardRect={editorState.rect}
+          onClose={handleClose}
+          onSave={handleSave}
+          onDelete={handleDelete}
         />
       )}
     </>

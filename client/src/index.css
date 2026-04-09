@@ -66,6 +66,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  button {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+  button:focus-visible {
+    outline: none;
+  }
+
   #root {
     @apply flex flex-col max-w-[430px] mx-auto relative overflow-hidden;
   }
@@ -77,4 +85,19 @@
 
   /* Selection */
   ::-selection { background: rgba(255,255,255,0.25); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(32px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(-32px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+@keyframes slideInFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

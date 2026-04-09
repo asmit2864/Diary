@@ -115,7 +115,7 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
       style={animStyle}
     >
       {/* Top bar */}
-      <div className="flex items-center px-4 pt-2.5 pb-[14px] gap-3 shrink-0">
+      <div className="flex items-center px-4 pt-4 pb-[14px] gap-3 shrink-0">
         <button 
           className="w-[38px] h-[38px] rounded-full bg-white/20 border border-white/35 text-white flex items-center justify-center cursor-pointer transition-colors backdrop-blur-md active:bg-white/30 shrink-0 hover:bg-white/25"
           onClick={handleClose}

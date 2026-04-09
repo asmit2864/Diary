@@ -77,6 +77,7 @@ export const verifyVaultPin = async (pin) => {
 const getEndpoint = (category) => {
   if (category === 'Documents') return `${BACKEND_URI}/api/documents`;
   if (category === 'Accounts') return `${BACKEND_URI}/api/accounts`;
+  if (category === 'Expenses') return `${BACKEND_URI}/api/expenses`;
   return `${BACKEND_URI}/api/notes`;
 };
 

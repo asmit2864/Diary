@@ -9,6 +9,7 @@ const fs = require('fs');
 const notesRouter    = require('./routes/notes');
 const documentsRouter = require('./routes/documents');
 const accountsRouter  = require('./routes/accounts');
+const expensesRouter  = require('./routes/expenses');
 const authRouter     = require('./routes/auth');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/auth', authRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/accounts', accountsRouter);
+app.use('/api/expenses', expensesRouter);
 
 // Serve React build
 const buildDir = path.resolve(__dirname, '../client/build');
