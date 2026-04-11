@@ -1,5 +1,9 @@
-const BACKEND_URI = process.env.REACT_APP_BACKEND_URI || '';
-const BASE_AUTH = `${BACKEND_URI}/auth`;
+// Use relative URLs so all requests flow through CRA's dev proxy
+// (or directly to Express in production). This avoids Mixed Content
+// errors when the React dev server runs on HTTPS.
+const BACKEND_URI = '';   // relative — proxy handles routing in dev
+
+const BASE_AUTH = `/auth`;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const fetchMe = async () => {

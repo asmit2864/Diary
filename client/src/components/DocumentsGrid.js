@@ -10,7 +10,7 @@ export default function DocumentsGrid({
 }) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const containerClasses = "flex-1 flex flex-col px-3 pt-2 pb-[110px] overflow-hidden";
+  const containerClasses = "flex-1 flex flex-col px-3 pt-2 pb-[86px] overflow-hidden";
   const stateMsgClasses = "flex flex-col items-center justify-center py-20 px-5 text-white/50 text-center mx-auto";
 
   const filteredDocs = documents.filter(doc => {

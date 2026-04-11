@@ -59,9 +59,8 @@ export default function DocumentCard({ doc, onClick, selectionMode, selected, on
     <div
       ref={cardRef}
       className={cn(
-        "bg-white/10 rounded-2xl overflow-hidden cursor-pointer transition-all duration-150 relative select-none flex flex-col shadow-sm border border-white/5",
-        "active:bg-white/20 active:scale-[0.98] hover:bg-white/15",
-        selected && "bg-white/30 ring-2 ring-white/70 scale-[0.97]",
+        "glass-card rounded-2xl overflow-hidden cursor-pointer relative select-none flex flex-col",
+        selected && "ring-2 ring-white/60 scale-[0.97]",
         selectionMode && !selected && "opacity-50"
       )}
       onClick={handleClick}

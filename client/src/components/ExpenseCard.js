@@ -48,9 +48,8 @@ export default function ExpenseCard({ expense, onClick, selectionMode, selected,
     <div
       ref={cardRef}
       className={cn(
-        "bg-white/10 rounded-[14px] px-[14px] pt-[13px] pb-[10px] cursor-pointer transition-all duration-150 relative select-none",
-        "active:bg-white/20 active:scale-95 hover:bg-white/15",
-        selected && "bg-white/30 ring-2 ring-white/70 scale-[0.97]",
+        "glass-card rounded-[14px] px-[14px] pt-[13px] pb-[10px] cursor-pointer relative select-none",
+        selected && "ring-2 ring-white/60 scale-[0.97]",
         selectionMode && !selected && "opacity-50"
       )}
       onClick={handleClick}

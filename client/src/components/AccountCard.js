@@ -66,10 +66,9 @@ export default function AccountCard({ account, onClick, selectionMode, selected,
     <div
       ref={cardRef}
       className={cn(
-        "bg-white/10 rounded-[16px] px-5 py-4 cursor-pointer transition-all duration-150 relative select-none flex flex-col gap-3 shadow-sm border border-white/5",
-        "hover:bg-white/15",
-        isPressed && "bg-white/20 scale-95",
-        selected && "bg-white/30 ring-2 ring-white/70 scale-[0.97]",
+        "glass-card rounded-[16px] px-5 py-4 cursor-pointer relative select-none flex flex-col gap-3",
+        isPressed && "scale-95",
+        selected && "ring-2 ring-white/60 scale-[0.97]",
         selectionMode && !selected && "opacity-50"
       )}
       onClick={handleClick}

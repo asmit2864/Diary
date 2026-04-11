@@ -15,12 +15,23 @@ const authRouter     = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS — allow frontend
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [process.env.FRONTEND_URI] 
-  : [process.env.FRONTEND_URI, 'http://localhost:3000', 'http://127.0.0.1:3000'];
+// CORS — in dev, allow any origin on the LAN (192.168.x.x / 10.x.x.x / localhost)
+const corsOrigin = process.env.NODE_ENV === 'production'
+  ? [process.env.FRONTEND_URI]
+  : (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      const isLocal =
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1') ||
+        /^https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
+        /^https?:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/.test(origin) ||
+        /^https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?$/.test(origin);
+      if (isLocal) return callback(null, true);
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    };
 
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors({ origin: corsOrigin, credentials: true }));
 
 // Fix Google Auth Popup Cross-Origin-Opener-Policy issue
 app.use((req, res, next) => {
@@ -50,8 +61,8 @@ if (fs.existsSync(buildDir)) {
   app.get('/', (req, res) => res.json({ status: 'API running — no client build found' }));
 }
 
-// Start server immediately so Render health check passes
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// Listen on all network interfaces so LAN devices can reach the server
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT} (all interfaces)`));
 
 // Connect to MongoDB
 mongoose

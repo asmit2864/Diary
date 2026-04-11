@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import Header from './components/Header';
@@ -21,6 +21,16 @@ export default function App() {
   const { user, loading: authLoading, login, register, logout, googleLogin } = useAuth();
 
   const [activeTab, setActiveTab] = useState('Notes');
+
+  // Apply per-section gradient to body via data attribute
+  useEffect(() => {
+    document.body.setAttribute('data-tab', activeTab);
+  }, [activeTab]);
+
+  // Set initial on mount
+  useEffect(() => {
+    document.body.setAttribute('data-tab', 'Notes');
+  }, []);
   const [editorState, setEditorState] = useState(null);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const selectionMode = selectedIds.size > 0;
@@ -121,7 +131,11 @@ export default function App() {
 
 
       {showVaultLogin ? (
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+        <div
+          className="flex-1 min-h-0 overflow-hidden flex flex-col"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <VaultLogin 
             user={user} 
             onUnlock={(key) => { 
