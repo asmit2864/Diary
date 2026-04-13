@@ -105,46 +105,7 @@ export default function FloatingNavbar({
     el.style.animation = 'glassIndScale 440ms ease';
   }, [activeTab]);
 
-  // ── Selection mode ────────────────────────────────────────────────
-  if (selectionMode) {
-    return (
-      <div style={{
-        position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 430,
-        zIndex: 100, display: 'flex', justifyContent: 'center',
-        padding: '8px 12px 12px',
-        boxSizing: 'border-box',
-      }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          height: PILL_H, padding: '8px 18px', borderRadius: 999,
-          backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
-          backdropFilter: 'blur(14px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(14px) saturate(180%)',
-          boxShadow: PILL_SHADOW,
-        }}>
-          <button onClick={onCancelSelection} aria-label="Cancel" style={{
-            width: 36, height: 36, borderRadius: '50%', cursor: 'pointer',
-            border: '1.5px solid rgba(255,255,255,0.28)',
-            background: 'rgba(255,255,255,0.10)', color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <X size={16} strokeWidth={2.5} />
-          </button>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap' }}>
-            {selectedCount} selected
-          </span>
-          <button onClick={onDeleteSelected} aria-label="Delete" style={{
-            width: 38, height: 38, borderRadius: 12, cursor: 'pointer',
-            background: 'rgba(239,68,68,0.85)', border: 'none', color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Trash2 size={18} />
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // ── Selection mode overlay (rendered alongside normal nav below) ──
 
   // ── Main nav ──────────────────────────────────────────────────────
   return (
@@ -205,7 +166,89 @@ export default function FloatingNavbar({
         }
         .gn-add:hover  { scale: 1.09; }
         .gn-add:active { scale: 0.90; }
+
+        .gn-del {
+          border: none;
+          cursor: pointer;
+          outline: none;
+          -webkit-tap-highlight-color: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          color: #fff;
+          flex-shrink: 0;
+          transition: scale 200ms cubic-bezier(0.5, 0, 0, 1);
+        }
+        .gn-del:hover  { scale: 1.09; }
+        .gn-del:active { scale: 0.90; }
+
+        @keyframes selectionBarIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
       `}</style>
+
+      {/* ── Selection overlay — floats above the nav bar when items are selected ── */}
+      {selectionMode && (
+        <div style={{
+          position: 'fixed',
+          bottom: PILL_H + 24,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 101,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          animation: 'selectionBarIn 220ms cubic-bezier(0.4, 0, 0.2, 1) both',
+        }}>
+          {/* Label pill */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            height: PILL_H, padding: '0 20px', borderRadius: 999,
+            backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
+            backdropFilter: 'blur(14px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+            boxShadow: PILL_SHADOW,
+          }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap' }}>
+              {selectedCount} selected
+            </span>
+          </div>
+
+          {/* Cancel button — round glass circle, same animation as + button */}
+          <button
+            className="gn-add"
+            onClick={onCancelSelection}
+            aria-label="Cancel selection"
+            style={{
+              width: PILL_H, height: PILL_H,
+              backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
+              backdropFilter: 'blur(14px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+              boxShadow: PILL_SHADOW,
+            }}
+          >
+            <X size={22} strokeWidth={2.5} />
+          </button>
+
+          {/* Delete button — round red-tinted glass circle, same animation as + button */}
+          <button
+            className="gn-del"
+            onClick={onDeleteSelected}
+            aria-label="Delete selected"
+            style={{
+              width: PILL_H, height: PILL_H,
+              backgroundColor: 'color-mix(in srgb, #ef4444 55%, transparent)',
+              backdropFilter: 'blur(14px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+              boxShadow: PILL_SHADOW,
+            }}
+          >
+            <Trash2 size={22} />
+          </button>
+        </div>
+      )}
 
       <div style={{
         position: 'fixed',
