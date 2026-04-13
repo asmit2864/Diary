@@ -9,7 +9,7 @@ function formatDate(iso) {
   return `${mo[d.getMonth()]} ${d.getDate()}`;
 }
 
-export default function NoteCard({ note, onClick, selectionMode, selected, onLongPress, onToggleSelect }) {
+export default function NoteCard({ note, onClick, selectionMode, selected, onLongPress, onToggleSelect, hidden }) {
   const timerRef = useRef(null);
   const didLongPress = useRef(false);
   const cardRef = useRef(null);
@@ -39,10 +39,11 @@ export default function NoteCard({ note, onClick, selectionMode, selected, onLon
     <div
       ref={cardRef}
       className={cn(
-        "glass-card rounded-[14px] px-[14px] pt-[13px] pb-[10px] cursor-pointer relative select-none",
+        "glass-pill-card rounded-[14px] px-[14px] pt-[13px] pb-[10px] cursor-pointer relative select-none",
         selected && "ring-2 ring-white/60 scale-[0.97]",
         selectionMode && !selected && "opacity-50"
       )}
+      style={{ opacity: hidden ? 0 : 1, pointerEvents: hidden ? 'none' : 'auto' }}
       onClick={handleClick}
       onMouseDown={startPress}
       onMouseUp={cancelPress}

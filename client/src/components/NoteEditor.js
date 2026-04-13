@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Trash2, Eye, EyeOff, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export default function NoteEditor({ note, category, cardRect, onClose, onSave, onDelete }) {
@@ -66,7 +66,16 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
     scheduleSave();
   };
 
-  // Save on back — waits for the PUT before reloading the grid
+  const [isOpen, setIsOpen] = useState(false);
+  
+  useEffect(() => {
+    // Small delay to ensure initial render is registered before triggering CSS transition
+    const frame = requestAnimationFrame(() => {
+      setIsOpen(true);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   const handleClose = async () => {
     clearTimeout(saveTO.current);
     
@@ -80,7 +89,12 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
     }
 
     if (isDirty.current) await doSave();
-    onClose();
+    
+    setIsOpen(false);
+    
+    setTimeout(() => {
+      onClose();
+    }, 400); // Wait for bounce out transition
   };
 
   const handleDelete = () => {
@@ -88,66 +102,67 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
     onDelete();
   };
 
-  // Build CSS vars for scale-from-card animation
-  const animStyle = React.useMemo(() => {
-    if (!cardRect) return {};
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const editorW = Math.min(vw, 430);
-    const editorLeft = (vw - editorW) / 2;
-    // Translate: move editor's centre to card's centre
-    const tx = (cardRect.left + cardRect.width  / 2) - (editorLeft + editorW / 2);
-    const ty = (cardRect.top  + cardRect.height / 2) - vh / 2;
-    // Scale: shrink editor to card's exact dimensions
-    const sx = cardRect.width  / editorW;
-    const sy = cardRect.height / vh;
-    return {
-      '--tx': `${tx}px`,
-      '--ty': `${ty}px`,
-      '--sx': sx,
-      '--sy': sy,
-    };
-  }, [cardRect]);
-
   return (
-    <div 
-      className="fixed inset-0 z-[200] flex flex-col max-w-[430px] mx-auto origin-center bg-gradient-to-b from-[#7b2fff] via-[#9b44ff_40%] via-[#b06ef3_70%] to-[#d49dff] animate-expandFromCard" 
-      style={animStyle}
-    >
-      {/* Top bar */}
-      <div className="flex items-center px-4 pt-4 pb-[14px] gap-3 shrink-0">
-        <button 
-          className="w-[38px] h-[38px] rounded-full bg-white/20 border border-white/35 text-white flex items-center justify-center cursor-pointer transition-colors backdrop-blur-md active:bg-white/30 shrink-0 hover:bg-white/25"
-          onClick={handleClose}
-        >
-          <ArrowLeft size={20} strokeWidth={2.5} />
-        </button>
-        
-        <span className="text-[13px] font-semibold bg-white/20 text-white rounded-full h-[38px] px-[14px] inline-flex items-center border border-white/35 uppercase tracking-wide backdrop-blur-md">
-          {category}
-        </span>
-        
-        <div className="flex gap-2 ml-auto shrink-0">
-          <button 
-            className="w-[38px] h-[38px] rounded-full bg-red-400/20 border border-red-400/35 text-[#ff6b6b] flex items-center justify-center cursor-pointer transition-colors backdrop-blur-md active:bg-red-400/35 hover:bg-red-400/25 shrink-0" 
-            onClick={handleDelete} 
-            title="Delete note"
+    <>
+      {/* Invisible Backing with Fade */}
+      <div 
+        className="fixed inset-0 z-[190] transition-opacity duration-300"
+        style={{ 
+          background: 'rgba(0,0,0,0.3)',
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? 'auto' : 'none'
+        }}
+        onClick={handleClose}
+      />
+      
+      {/* Modal Container to enforce exact #root limits and 12px margins */}
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center pointer-events-none">
+        <div className="w-full max-w-[430px] h-full flex flex-col p-3">
+          <div 
+            className="relative w-full flex-1 flex flex-col pointer-events-auto overflow-hidden glass-pill-card" 
+            style={{
+              borderRadius: '16px',
+              transform: isOpen ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(40px)',
+              opacity: isOpen ? 1 : 0,
+              transition: 'transform 0.45s cubic-bezier(0.5, 1.5, 0.5, 1), opacity 0.35s ease-out',
+              willChange: 'transform, opacity'
+            }}
           >
-            <Trash2 size={18} strokeWidth={2.5} />
-          </button>
-        </div>
-      </div>
+        
+        {/* ── Editor Full UI ── */}
+        <div className="absolute inset-0 flex flex-col w-full h-full">
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-5 pt-2.5 pb-[30px] flex flex-col gap-3.5 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
-        <textarea
-          ref={titleElRef}
-          className="font-serif text-[28px] border-none bg-transparent text-white outline-none w-full leading-[1.3] overflow-hidden resize-none caret-white/80 placeholder:text-white/30"
-          placeholder="Title"
-          value={title}
-          rows={1}
-          onChange={handleTitleChange}
-        />
+      <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+        
+        {/* Title Row */}
+        <div className="flex items-center justify-between gap-3 w-full min-h-[42px]">
+          <textarea
+            ref={titleElRef}
+            className="font-serif text-[28px] border-none bg-transparent text-white outline-none flex-1 leading-[1.3] overflow-hidden resize-none caret-white/80 placeholder:text-white/30 pt-0.5"
+            placeholder="Title"
+            value={title}
+            rows={1}
+            onChange={handleTitleChange}
+          />
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button 
+              className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
+              onClick={handleDelete} 
+              title="Delete note"
+            >
+              <Trash2 size={18} className="text-[#ff6b6b]" strokeWidth={2.5} />
+            </button>
+            <button 
+              className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
+              onClick={handleClose} 
+              title="Close note"
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+
         <div className="h-px bg-white/20 shrink-0 w-full" />
         
         <textarea
@@ -166,6 +181,10 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
       )}>
         ✓ Saved
       </div>
+      </div>
+      </div>
     </div>
+    </div>
+    </>
   );
 }

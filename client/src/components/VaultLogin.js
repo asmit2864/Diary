@@ -138,8 +138,18 @@ export default function VaultLogin({ user, onUnlock }) {
           <button
             key={num}
             onClick={() => handleKeypad(num.toString())}
-            style={{ width: BTN, height: BTN, fontSize: BTN_FONT, borderRadius: '50%', flexShrink: 0 }}
-            className="bg-white/5 border border-white/[0.08] text-white font-semibold flex items-center justify-center transition-all duration-150 hover:bg-white/10 active:scale-90 active:bg-white/15"
+            style={{
+              width: BTN,
+              height: BTN,
+              fontSize: BTN_FONT,
+              borderRadius: '50%',
+              flexShrink: 0,
+              backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
+              backdropFilter: 'blur(14px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+              boxShadow: PILL_SHADOW,
+            }}
+            className="text-white font-semibold flex items-center justify-center transition-all duration-150 active:scale-90"
           >
             {num}
           </button>
@@ -149,8 +159,18 @@ export default function VaultLogin({ user, onUnlock }) {
         <div style={{ width: BTN, height: BTN }} />
         <button
           onClick={() => handleKeypad('0')}
-          style={{ width: BTN, height: BTN, fontSize: BTN_FONT, borderRadius: '50%', flexShrink: 0 }}
-          className="bg-white/5 border border-white/[0.08] text-white font-semibold flex items-center justify-center transition-all duration-150 hover:bg-white/10 active:scale-90 active:bg-white/15"
+          style={{
+            width: BTN,
+            height: BTN,
+            fontSize: BTN_FONT,
+            borderRadius: '50%',
+            flexShrink: 0,
+            backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
+            backdropFilter: 'blur(14px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+            boxShadow: PILL_SHADOW,
+          }}
+          className="text-white font-semibold flex items-center justify-center transition-all duration-150 active:scale-90"
         >
           0
         </button>

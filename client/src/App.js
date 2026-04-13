@@ -27,10 +27,7 @@ export default function App() {
     document.body.setAttribute('data-tab', activeTab);
   }, [activeTab]);
 
-  // Set initial on mount
-  useEffect(() => {
-    document.body.setAttribute('data-tab', 'Notes');
-  }, []);
+
   const [editorState, setEditorState] = useState(null);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const selectionMode = selectedIds.size > 0;
@@ -41,7 +38,7 @@ export default function App() {
   const isVaultTab = activeTab === 'Accounts' || activeTab === 'Documents';
   const showVaultLogin = isVaultTab && !vaultUnlocked;
 
-  const { notes, loading, error, reload } = useNotes(activeTab, vaultKey);
+  const { notes, loading, error, reload, addNote, editNote, removeNote } = useNotes(activeTab, vaultKey);
 
   // ── Auth handlers ─────────────────────────────────────────────────────────
   const handleAuth = async (mode, email, password) => {
@@ -85,15 +82,14 @@ export default function App() {
   });
   const handleCancelSelection = () => setSelectedIds(new Set());
   const handleDeleteSelected = async () => {
-    try { await Promise.all([...selectedIds].map(id => deleteNote(id, activeTab))); }
+    try { await Promise.all([...selectedIds].map(id => removeNote(id))); }
     catch (e) { console.error(e); }
     setSelectedIds(new Set());
-    reload();
   };
 
   const handleFabSelect = async (category) => {
     try {
-      const newNote = await createNote({ title: '', body: '', category });
+      const newNote = await addNote({ title: '', body: '', category });
       setEditorState({ note: newNote, category, rect: null });
     } catch (e) { console.error(e); }
   };
@@ -101,25 +97,24 @@ export default function App() {
   const handleSave = async ({ title, body, accountId, accountPassword, notes: accNotes, documentUrl, entries, initialTotal }) => {
     if (!editorState?.note?._id) return;
     try {
-      await updateNote(editorState.note._id, { title, body, accountId, accountPassword, notes: accNotes, documentUrl, entries, initialTotal, category: editorState.category });
+      await editNote(editorState.note._id, { title, body, accountId, accountPassword, notes: accNotes, documentUrl, entries, initialTotal, category: editorState.category });
     } catch (e) { console.error(e); }
   };
 
   const handleUpdateInline = async (id, data, category) => {
     try {
-      await updateNote(id, { ...data, category });
+      await editNote(id, { ...data, category });
       // do not implicitly reload here constantly, it can interrupt typing if focus resets. Let AccountCard handle local state optimism.
     } catch (e) { console.error(e); }
   };
 
   const handleDelete = async () => {
     if (!editorState?.note?._id) return;
-    try { await deleteNote(editorState.note._id, editorState.category); } catch (e) { console.error(e); }
+    try { await removeNote(editorState.note._id); } catch (e) { console.error(e); }
     setEditorState(null);
-    reload();
   };
 
-  const handleClose = () => { setEditorState(null); reload(); };
+  const handleClose = () => { setEditorState(null); };
 
   // ── Render ────────────────────────────────────────────────────────────────
   if (authLoading) return <div className="flex items-center justify-center h-[100dvh]"><Loader2 className="w-8 h-8 animate-spin text-white/70" /></div>;

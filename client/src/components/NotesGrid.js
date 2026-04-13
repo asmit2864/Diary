@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 export default function NotesGrid({
   notes, loading, error,
   onNoteClick, onNoteLongPress, onNoteToggleSelect,
-  selectionMode, selectedIds,
+  selectionMode, selectedIds, hiddenNoteId,
   onTouchStart, onTouchEnd,
 }) {
   const containerClasses = "flex-1 overflow-y-auto overflow-x-hidden px-3 pt-2 pb-[86px] [&::-webkit-scrollbar]:hidden";
@@ -57,6 +57,7 @@ export default function NotesGrid({
               onToggleSelect={onNoteToggleSelect}
               selectionMode={selectionMode}
               selected={selectedIds.has(note._id)}
+              hidden={note._id === hiddenNoteId}
             />
           ))}
         </div>
@@ -70,6 +71,7 @@ export default function NotesGrid({
               onToggleSelect={onNoteToggleSelect}
               selectionMode={selectionMode}
               selected={selectedIds.has(note._id)}
+              hidden={note._id === hiddenNoteId}
             />
           ))}
         </div>

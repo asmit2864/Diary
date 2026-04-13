@@ -26,7 +26,7 @@ export default function Header({ user, onLogout }) {
   };
 
   return (
-    <header className="frost-header flex-shrink-0 flex flex-col px-5 pt-4 pb-3 relative z-50 max-w-[430px] mx-auto w-full">
+    <header className="flex-shrink-0 flex flex-col px-5 pt-4 pb-3 relative z-50 max-w-[430px] mx-auto w-full">
       {/* Top Navbar Row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -36,13 +36,7 @@ export default function Header({ user, onLogout }) {
 
         <div className="relative" ref={menuRef}>
           <button
-            className="w-10 h-10 rounded-full text-white text-[14px] font-bold font-sans flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            style={{
-              background: 'rgba(255,255,255,0.12)',
-              backdropFilter: 'blur(16px)',
-              border: '1.5px solid rgba(255,255,255,0.28)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
-            }}
+            className="w-10 h-10 rounded-full text-white text-[14px] font-bold font-sans flex items-center justify-center transition-all hover:scale-105 active:scale-95 glass-pill-card"
             onClick={() => setMenuOpen(o => !o)}
             aria-label="Account menu"
           >
