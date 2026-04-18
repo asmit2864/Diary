@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Feather, Loader2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
 import { cn } from '../lib/utils';
 

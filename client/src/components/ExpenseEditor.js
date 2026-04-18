@@ -214,7 +214,7 @@ function LiquidToggle({ type, onChange }) {
       toggle.removeEventListener('keyup', handleKeyup);
       if (draggableArr && draggableArr[0]) draggableArr[0].kill();
     };
-  }, []);
+  }, [isPlus, onChange]);
 
   useEffect(() => {
     if (!toggleRef.current) return;
@@ -534,7 +534,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
       setActiveEntryId(null);
       scheduleSave();
     }
-  }, [scheduleSave]);
+  }, [scheduleSave, deleteEntry]);
 
   const handleClose = useCallback(async () => {
     clearTimeout(saveTO.current);

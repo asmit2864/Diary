@@ -8,7 +8,6 @@ import { uploadEncryptedBlobToCloudinary, downloadAndDecryptFile, hasCachedFile,
 export default function DocumentEditor({ note, category, cardRect, onClose, onSave, onDelete, vaultKey }) {
   const [title, setTitle] = useState(note?.title || '');
   const [body, setBody]   = useState(note?.body  || '');
-  const [documentUrl, setDocumentUrl] = useState(note?.documentUrl || '');
   const [saved, setSaved] = useState(false);
   
   const [uploading, setUploading] = useState(false);
@@ -137,7 +136,6 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
       const secureUrl = await uploadEncryptedBlobToCloudinary(encBlob);
       
       documentUrlVal.current = secureUrl;
-      setDocumentUrl(secureUrl);
       scheduleSave();
       
     } catch (err) {

@@ -15,7 +15,6 @@ import AuthPage from './components/AuthPage';
 import VaultLogin from './components/VaultLogin';
 import { useNotes } from './hooks/useNotes';
 import { TABS } from './utils/constants';
-import { createNote, updateNote, deleteNote } from './utils/api';
 
 export default function App() {
   const { user, loading: authLoading, login, register, logout, googleLogin } = useAuth();

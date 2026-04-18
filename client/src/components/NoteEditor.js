@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Trash2, Eye, EyeOff, X } from 'lucide-react';
+import { Trash2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useHardwareBack } from '../hooks/useHardwareBack';
 

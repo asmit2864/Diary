@@ -9,7 +9,6 @@ export default function ExpensesGrid({
   onTouchStart, onTouchEnd,
 }) {
   const containerClasses = "flex-1 overflow-y-auto overflow-x-hidden px-3 pt-2 pb-[86px] [&::-webkit-scrollbar]:hidden";
-  const stateMsgClasses = "flex flex-col items-center justify-center py-20 px-5 text-white/50 text-center";
 
   if (loading) {
     return (

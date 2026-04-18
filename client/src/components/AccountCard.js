@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { encryptText } from '../utils/crypto';
 import { getIconForTitle } from '../utils/getIconForTitle';
 

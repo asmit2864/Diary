@@ -274,7 +274,7 @@
 }
 
 .indicator--masked .mask {
-  translate: calc((var(--complete) / 100) * (100cqi - 60cqi - (0 * var(--border)))) -50%;
+  translate: calc((var(--complete) / 100) * (100cqi - 60cqi - (0 * var(--toggle-border)))) -50%;
   transition-property: height, width, margin, scale;
   transition-duration: var(--transition);
   transition-timing-function: var(--ease);
@@ -288,7 +288,7 @@
 }
 
 .liquid-toggle[aria-pressed='true']:not([data-active='true']) .liquid__track {
-  left: calc(var(--border) * 6);
+  left: calc(var(--toggle-border) * 6);
 }
 
 .liquid__track {
@@ -296,7 +296,7 @@
   transition-property: height, width, filter, left;
   transition-duration: var(--transition);
   transition-timing-function: var(--ease);
-  translate: calc((var(--complete) / 100) * (100cqi - 100% - (6 * var(--border)))) -50%;
+  translate: calc((var(--complete) / 100) * (100cqi - 100% - (6 * var(--toggle-border)))) -50%;
 }
 
 .liquid-toggle[data-mapped='false'] .liquid__track {
@@ -306,7 +306,7 @@
 }
 
 .indicator__liquid {
-  translate: calc((var(--complete) / 100) * (100cqi - 100% - (2 * var(--border)))) -50%;
+  translate: calc((var(--complete) / 100) * (100cqi - 100% - (2 * var(--toggle-border)))) -50%;
   transition-property: scale;
   transition-duration: var(--transition);
   transition-timing-function: var(--ease);
@@ -318,9 +318,9 @@
 
 .liquid-toggle[data-active='true'] .indicator--masked .mask,
 .liquid-toggle:active .indicator--masked .mask {
-  height: calc((100% - (2 * var(--border))) * (1.65 - (var(--delta, 0) * 0.025)));
-  width: calc((60% - (2 * var(--border))) * (1.65 + (var(--delta, 0) * 0.025)));
-  margin-left: calc((60% - (2 * var(--border))) * ((.65 + (var(--delta, 0) * 0.025)) * -0.5));
+  height: calc((100% - (2 * var(--toggle-border))) * (1.65 - (var(--delta, 0) * 0.025)));
+  width: calc((60% - (2 * var(--toggle-border))) * (1.65 + (var(--delta, 0) * 0.025)));
+  margin-left: calc((60% - (2 * var(--toggle-border))) * ((.65 + (var(--delta, 0) * 0.025)) * -0.5));
 }
 
 .liquid-toggle[data-active='true'] .indicator__liquid,
@@ -345,8 +345,8 @@
 
 .liquid-toggle[data-active='true'] .indicator__liquid .liquid__track,
 .liquid-toggle:active .indicator__liquid .liquid__track {
-  left: calc(var(--border) * 3);
-  height: calc((var(--height) * 1px) - (6 * var(--border)));
+  left: calc(var(--toggle-border) * 3);
+  height: calc((var(--height) * 1px) - (6 * var(--toggle-border)));
 }
 
 .liquid-toggle[data-mapped='false'] {
@@ -371,7 +371,7 @@
       calc((94 - (var(--complete) / 100 * 18)) * 1%),
       calc((82 - (var(--complete) / 100 * 9)) * 1%));
   --control: hsl(300, 100%, 100%);
-  --border: 5px;
+  --toggle-border: 5px;
   --width: 140;
   --height: 60;
   height: calc(var(--height) * 1px);
