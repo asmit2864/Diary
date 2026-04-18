@@ -67,9 +67,8 @@ export default function AuthPage({ onAuth }) {
         <CardContent className="p-6">
           
           <div className="mb-6 w-full">
-            <Button
-              variant="outline"
-              className="w-full flex items-center justify-center gap-3 bg-white/15 border-white/30 text-white hover:bg-white/25 hover:text-white rounded-full h-12"
+            <button
+              className="w-full h-[54px] flex items-center justify-center gap-3 glass-pill-card active:scale-[0.98] transition-transform rounded-[18px] text-white text-[15px] font-medium shadow-xl"
               onClick={() => googleLoginHandler()}
               type="button"
               disabled={loading}
@@ -81,7 +80,7 @@ export default function AuthPage({ onAuth }) {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="currentColor"/>
               </svg>
               Continue with Google
-            </Button>
+            </button>
           </div>
 
           <div className="flex items-center text-center text-white/45 text-[13px] font-medium mb-6 uppercase tracking-wide before:flex-1 before:border-b before:border-white/15 after:flex-1 after:border-b after:border-white/15">
@@ -89,91 +88,84 @@ export default function AuthPage({ onAuth }) {
           </div>
 
           {/* Mode toggle */}
-          <div className="relative flex bg-black/15 rounded-xl p-1 mb-6">
+          <div className="relative flex glass-pill-card rounded-[18px] p-1.5 mb-8 shadow-xl">
             <div
               className={cn(
-                "absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white/20 rounded-lg transition-transform duration-300 ease-out",
+                "absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white/20 rounded-[14px] transition-transform duration-300 ease-out shadow-sm",
                 mode === 'login' ? "translate-x-0" : "translate-x-full"
               )}
             />
             <button
               className={cn(
-                "flex-1 py-2 rounded-lg text-[15px] font-medium transition-colors z-10",
-                mode === 'login' ? "text-white font-semibold" : "text-white/55"
+                "flex-1 py-2.5 rounded-[14px] text-[15px] font-medium transition-colors z-10 outline-none",
+                mode === 'login' ? "text-white font-semibold" : "text-white/50"
               )}
               onClick={() => reset('login')}
             >Log In</button>
             <button
               className={cn(
-                "flex-1 py-2 rounded-lg text-[15px] font-medium transition-colors z-10",
-                mode === 'register' ? "text-white font-semibold" : "text-white/55"
+                "flex-1 py-2.5 rounded-[14px] text-[15px] font-medium transition-colors z-10 outline-none",
+                mode === 'register' ? "text-white font-semibold" : "text-white/50"
               )}
               onClick={() => reset('register')}
             >Register</button>
           </div>
 
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-semibold text-white/65 uppercase tracking-wide">Email</label>
-              <Input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/50 focus-visible:bg-white/20 h-12 rounded-xl text-base"
-              />
-            </div>
+          <form className="flex flex-col gap-3.5" onSubmit={handleSubmit}>
+            <input
+              type="email"
+              placeholder="Email (you@example.com)"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              className="w-full bg-white/5 border border-white/10 rounded-[18px] px-5 py-[18px] text-[15px] text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/40 focus-visible:bg-white/10 shadow-inner outline-none transition-all"
+            />
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-semibold text-white/65 uppercase tracking-wide">Password</label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                minLength={6}
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/50 focus-visible:bg-white/20 h-12 rounded-xl text-base"
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="Password (••••••••)"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              minLength={6}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              className="w-full bg-white/5 border border-white/10 rounded-[18px] px-5 py-[18px] text-[15px] text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/40 focus-visible:bg-white/10 shadow-inner outline-none transition-all"
+            />
 
             <div
               className={cn(
-                "flex flex-col gap-1.5 overflow-hidden transition-all duration-300 ease-out",
-                mode === 'register' ? "max-h-[100px] opacity-100" : "max-h-0 opacity-0 -mt-4 pointer-events-none"
+                "overflow-hidden transition-all duration-300 ease-out",
+                mode === 'register' ? "max-h-[100px] opacity-100" : "max-h-0 opacity-0 -mt-3 pointer-events-none"
               )}
             >
-              <label className="text-[13px] font-semibold text-white/65 uppercase tracking-wide">Confirm Password</label>
-              <Input
+              <input
                 type="password"
-                placeholder="••••••••"
+                placeholder="Confirm Password"
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
                 required={mode === 'register'}
                 autoComplete="new-password"
                 tabIndex={mode === 'register' ? 0 : -1}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/50 focus-visible:bg-white/20 h-12 rounded-xl text-base"
+                className="w-full bg-white/5 border border-white/10 rounded-[18px] px-5 py-[18px] text-[15px] text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/40 focus-visible:bg-white/10 shadow-inner outline-none transition-all"
               />
             </div>
 
             {error && (
-              <p className="bg-red-400/20 border border-red-400/40 rounded-xl p-3 text-sm text-red-200 mt-2">
+              <p className="bg-red-400/20 border border-red-400/30 rounded-xl p-3 text-sm text-red-200 mt-1">
                 {error}
               </p>
             )}
 
-            <Button
+            <button
               type="submit"
               disabled={loading}
-              className="mt-2 h-12 bg-white/25 border border-white/45 rounded-xl text-white font-semibold hover:bg-white/30 active:scale-95 transition-all text-base"
+              className="mt-3 w-full h-[54px] glass-pill-card rounded-[18px] text-white font-bold flex items-center justify-center active:scale-[0.98] transition-all text-[16px] shadow-xl outline-none"
             >
               {loading ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Please wait…</>
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin text-white/70" /> Please wait…</>
               ) : mode === 'login' ? 'Log In' : 'Create Account'}
-            </Button>
+            </button>
           </form>
 
           <p className="mt-6 text-center text-[15px] text-white/50">

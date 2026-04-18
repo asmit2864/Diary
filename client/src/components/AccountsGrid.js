@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AccountCard from './AccountCard';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function AccountsGrid({
   accounts, loading, error,
@@ -15,7 +15,8 @@ export default function AccountsGrid({
   const stateMsgClasses = "flex flex-col items-center justify-center py-20 px-5 text-white/50 text-center mx-auto";
 
   const filteredAccounts = accounts.filter(acc => {
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
     const titleMatch = acc.title && acc.title.toLowerCase().includes(q);
     const idMatch = acc.accountId && acc.accountId.toLowerCase().includes(q);
     return titleMatch || idMatch;
@@ -23,18 +24,36 @@ export default function AccountsGrid({
 
   if (loading) {
     return (
-      <div className={containerClasses} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-        <div className={stateMsgClasses}><Loader2 className="w-9 h-9 animate-spin text-white/80" /></div>
+      <div className="flex-1 flex items-center justify-center p-5 text-white/50 pb-[86px]" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <Loader2 className="w-10 h-10 animate-spin text-white/80" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={containerClasses} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-        <div className={stateMsgClasses}>
-          <span className="text-[44px] block mb-3.5 opacity-50">⚠️</span>
-          <p className="text-base leading-[1.7]">Couldn't load accounts.<br />Check your connection.</p>
+      <div className="flex-1 flex items-center justify-center p-8 text-center pb-[120px]" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div className="flex flex-col items-center max-w-[280px]">
+          <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mb-4 border border-red-500/20 shadow-lg">
+            <AlertCircle size={32} className="text-red-400/80" strokeWidth={2} />
+          </div>
+          <h3 className="text-[19px] font-bold text-white/90 mb-2">Sync Failed</h3>
+        </div>
+      </div>
+    );
+  }
+
+  if (!accounts.length) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8 text-center pb-[120px]" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div className="flex flex-col items-center max-w-[280px]">
+          <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10 shadow-xl backdrop-blur-sm">
+            <ShieldCheck size={32} className="text-white/60" strokeWidth={2} />
+          </div>
+          <h3 className="text-[19px] font-bold text-white/90 mb-2">No accounts yet</h3>
+          <p className="text-[15px] text-white/40 leading-relaxed">
+            Tap the + button to save your first password
+          </p>
         </div>
       </div>
     );
@@ -58,12 +77,7 @@ export default function AccountsGrid({
       </div>
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col gap-3 content-start pb-4">
-        {!accounts.length ? (
-          <div className={stateMsgClasses}>
-            <span className="text-[44px] block mb-3.5 opacity-50">🔐</span>
-            <p className="text-base leading-[1.7]">No accounts saved.<br />Tap + to store credentials.</p>
-          </div>
-        ) : !filteredAccounts.length ? (
+        {!filteredAccounts.length ? (
           <div className={stateMsgClasses}>
             <p className="text-base leading-[1.7]">No accounts match "{searchQuery}"</p>
           </div>

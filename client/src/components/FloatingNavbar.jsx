@@ -1,10 +1,10 @@
 import React, { useRef, useLayoutEffect } from "react";
-import { Book, Shield, File, IndianRupee, Plus, X, Trash2 } from "lucide-react";
+import { Pencil, Shield, File, IndianRupee, Plus, X, Trash2 } from "lucide-react";
 
 const TABS = ['Notes', 'Expenses', 'Documents', 'Accounts'];
 
 const TAB_ICONS = {
-  Notes:     <Book        size={21} strokeWidth={2.2} />,
+  Notes:     <Pencil      size={21} strokeWidth={2.2} />,
   Expenses:  <IndianRupee size={21} strokeWidth={2.2} />,
   Documents: <File        size={21} strokeWidth={2.2} />,
   Accounts:  <Shield      size={21} strokeWidth={2.2} />,
@@ -184,8 +184,8 @@ export default function FloatingNavbar({
         .gn-del:active { scale: 0.90; }
 
         @keyframes selectionBarIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
 
@@ -196,59 +196,65 @@ export default function FloatingNavbar({
           bottom: PILL_H + 24,
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 101,
+          zIndex: 9999,
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          animation: 'selectionBarIn 220ms cubic-bezier(0.4, 0, 0.2, 1) both',
+          gap: 12,
         }}>
           {/* Label pill */}
           <div style={{
             display: 'flex', alignItems: 'center',
-            height: PILL_H, padding: '0 20px', borderRadius: 999,
-            backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
-            backdropFilter: 'blur(14px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+            height: 52, padding: '0 24px', borderRadius: 999,
+            background: 'rgba(187, 187, 188, 0.2)',
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
             boxShadow: PILL_SHADOW,
+            overflow: 'hidden',
           }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap' }}>
-              {selectedCount} selected
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>
+              {selectedCount} Selected
             </span>
           </div>
 
-          {/* Cancel button — round glass circle, same animation as + button */}
+          {/* Cancel button */}
           <button
             className="gn-add"
             onClick={onCancelSelection}
             aria-label="Cancel selection"
             style={{
-              width: PILL_H, height: PILL_H,
-              backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
-              backdropFilter: 'blur(14px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+              width: 52, height: 52,
+              background: 'rgba(187, 187, 188, 0.2)',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
               boxShadow: PILL_SHADOW,
+              overflow: 'hidden',
             }}
           >
-            <X size={22} strokeWidth={2.5} />
+            <X size={24} strokeWidth={2.8} />
           </button>
 
-          {/* Delete button — round red-tinted glass circle, same animation as + button */}
+          {/* Delete button */}
           <button
-            className="gn-del"
+            className="gn-add"
             onClick={onDeleteSelected}
             aria-label="Delete selected"
             style={{
-              width: PILL_H, height: PILL_H,
-              backgroundColor: 'color-mix(in srgb, #ef4444 55%, transparent)',
-              backdropFilter: 'blur(14px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+              width: 52, height: 52,
+              background: 'rgba(187, 187, 188, 0.2)',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
               boxShadow: PILL_SHADOW,
+              color: '#ff8a8a',
+              overflow: 'hidden',
             }}
           >
-            <Trash2 size={22} />
+            <Trash2 size={24} strokeWidth={2.5} />
           </button>
         </div>
       )}
+
+
+
 
       <div style={{
         position: 'fixed',

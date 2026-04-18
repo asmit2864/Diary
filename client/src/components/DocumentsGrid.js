@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DocumentCard from './DocumentCard';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, FolderOpen, AlertCircle } from 'lucide-react';
 
 export default function DocumentsGrid({
   documents, loading, error,
@@ -14,7 +14,8 @@ export default function DocumentsGrid({
   const stateMsgClasses = "flex flex-col items-center justify-center py-20 px-5 text-white/50 text-center mx-auto";
 
   const filteredDocs = documents.filter(doc => {
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
     const titleMatch = doc.title && doc.title.toLowerCase().includes(q);
     const bodyMatch = doc.body && doc.body.toLowerCase().includes(q);
     return titleMatch || bodyMatch;
@@ -22,18 +23,36 @@ export default function DocumentsGrid({
 
   if (loading) {
     return (
-      <div className={containerClasses} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-        <div className={stateMsgClasses}><Loader2 className="w-9 h-9 animate-spin text-white/80" /></div>
+      <div className="flex-1 flex items-center justify-center p-5 text-white/50 pb-[86px]" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <Loader2 className="w-10 h-10 animate-spin text-white/80" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={containerClasses} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-        <div className={stateMsgClasses}>
-          <span className="text-[44px] block mb-3.5 opacity-50">⚠️</span>
-          <p className="text-base leading-[1.7]">Couldn't load documents.<br />Check your connection.</p>
+      <div className="flex-1 flex items-center justify-center p-8 text-center pb-[120px]" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div className="flex flex-col items-center max-w-[280px]">
+          <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mb-4 border border-red-500/20 shadow-lg">
+            <AlertCircle size={32} className="text-red-400/80" strokeWidth={2} />
+          </div>
+          <h3 className="text-[19px] font-bold text-white/90 mb-2">Sync Failed</h3>
+        </div>
+      </div>
+    );
+  }
+
+  if (!documents.length) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8 text-center pb-[120px]" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div className="flex flex-col items-center max-w-[280px]">
+          <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10 shadow-xl backdrop-blur-sm">
+            <FolderOpen size={32} className="text-white/60" strokeWidth={2} />
+          </div>
+          <h3 className="text-[19px] font-bold text-white/90 mb-2">No documents yet</h3>
+          <p className="text-[15px] text-white/40 leading-relaxed">
+            Tap the + button to secure your first document
+          </p>
         </div>
       </div>
     );
@@ -57,12 +76,7 @@ export default function DocumentsGrid({
       </div>
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col gap-2.5 content-start pb-4">
-        {!documents.length ? (
-          <div className={stateMsgClasses}>
-            <span className="text-[44px] block mb-3.5 opacity-50">📄</span>
-            <p className="text-base leading-[1.7]">No documents yet.<br />Tap + to draft one.</p>
-          </div>
-        ) : !filteredDocs.length ? (
+        {!filteredDocs.length ? (
           <div className={stateMsgClasses}>
             <p className="text-base leading-[1.7]">No documents match "{searchQuery}"</p>
           </div>

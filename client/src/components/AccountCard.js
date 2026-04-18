@@ -36,10 +36,7 @@ export default function AccountCard({ account, onClick, selectionMode, selected,
     }
   };
 
-  const [isPressed, setIsPressed] = useState(false);
-
   const startPress = () => {
-    setIsPressed(true);
     didLongPress.current = false;
     timerRef.current = setTimeout(() => {
       didLongPress.current = true;
@@ -48,7 +45,6 @@ export default function AccountCard({ account, onClick, selectionMode, selected,
   };
 
   const cancelPress = () => {
-    setIsPressed(false);
     clearTimeout(timerRef.current);
   };
 
@@ -66,12 +62,17 @@ export default function AccountCard({ account, onClick, selectionMode, selected,
     <div
       ref={cardRef}
       className={cn(
-        "glass-card rounded-[16px] px-5 py-4 cursor-pointer relative select-none flex flex-col gap-3",
-        isPressed && "scale-95",
-        selected && "ring-2 ring-white/60 scale-[0.97]",
-        selectionMode && !selected && "opacity-50"
+        "glass-pill-card rounded-[16px] px-5 py-4 cursor-pointer relative select-none flex flex-col gap-3 transition-all duration-200 [&:has(.no-shrink:active)]:active:!transform-none",
+        selected && "z-10"
       )}
-      onClick={handleClick}
+      style={{
+        opacity: selectionMode && !selected ? 0.6 : 1,
+        ...(selected ? {
+          transform: 'scale(0.95)',
+          boxShadow: '0 0 0 2px rgba(255,255,255,0.8), 0 8px 32px rgba(0,0,0,0.4)',
+          borderColor: 'rgba(255,255,255,0.8)'
+        } : {})
+      }}      onClick={handleClick}
       onMouseDown={startPress}
       onMouseUp={cancelPress}
       onMouseLeave={cancelPress}
@@ -89,7 +90,7 @@ export default function AccountCard({ account, onClick, selectionMode, selected,
       </div>
       
       <div 
-        className="flex flex-col gap-1.5 mt-1 cursor-auto"
+        className="flex flex-col gap-1.5 mt-1 cursor-auto no-shrink"
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
         onMouseUp={e => e.stopPropagation()}

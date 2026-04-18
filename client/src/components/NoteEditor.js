@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Trash2, Eye, EyeOff, X } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useHardwareBack } from '../hooks/useHardwareBack';
 
 export default function NoteEditor({ note, category, cardRect, onClose, onSave, onDelete }) {
   const [title, setTitle] = useState(note?.title || '');
@@ -97,10 +98,20 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
     }, 400); // Wait for bounce out transition
   };
 
+  const handleForceClose = async () => {
+    clearTimeout(saveTO.current);
+    const isEmpty = !titleVal.current.trim() && !bodyVal.current.trim();
+    if (isEmpty) { onDelete(); return; }
+    if (isDirty.current) await doSave();
+    onClose(); // instant, no animation delay
+  };
+
   const handleDelete = () => {
     clearTimeout(saveTO.current);
     onDelete();
   };
+
+  useHardwareBack(handleClose);
 
   return (
     <>
@@ -155,7 +166,7 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
             </button>
             <button 
               className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
-              onClick={handleClose} 
+              onClick={handleForceClose} 
               title="Close note"
             >
               <X size={20} strokeWidth={2.5} />

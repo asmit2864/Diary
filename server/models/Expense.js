@@ -14,6 +14,10 @@ const entrySchema = new mongoose.Schema({
     type: String,
     enum: ['plus', 'minus'],
     default: 'minus'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 

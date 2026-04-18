@@ -117,7 +117,7 @@ export default function App() {
   const handleClose = () => { setEditorState(null); };
 
   // ── Render ────────────────────────────────────────────────────────────────
-  if (authLoading) return <div className="flex items-center justify-center h-[100dvh]"><Loader2 className="w-8 h-8 animate-spin text-white/70" /></div>;
+  if (authLoading) return <div className="flex-1 flex items-center justify-center h-[100dvh]"><Loader2 className="w-9 h-9 animate-spin text-white/80" /></div>;
   if (!user) return <AuthPage onAuth={handleAuth} />;
 
   return (

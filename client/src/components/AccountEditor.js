@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Trash2, Eye, EyeOff, X } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useHardwareBack } from '../hooks/useHardwareBack';
 import { encryptText } from '../utils/crypto';
 
 export default function AccountEditor({ note: account, category, cardRect, onClose, onSave, onDelete, vaultKey }) {
@@ -87,6 +88,16 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
     scheduleSave();
   };
 
+  const [isOpen, setIsOpen] = useState(false);
+  
+  useEffect(() => {
+    // Small delay to ensure initial render is registered before triggering CSS transition
+    const frame = requestAnimationFrame(() => {
+      setIsOpen(true);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   const handleClose = async () => {
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && !accountIdVal.current.trim() && !passwordVal.current.trim() && !notesVal.current.trim();
@@ -95,7 +106,11 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
       return;
     }
     if (isDirty.current) await doSave();
-    onClose();
+    
+    setIsOpen(false);
+    setTimeout(() => {
+      onClose();
+    }, 400); // Wait for bounce out transition
   };
 
   const handleDelete = () => {
@@ -103,107 +118,129 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
     onDelete();
   };
 
-  const animStyle = React.useMemo(() => {
-    if (!cardRect) return {};
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const editorW = Math.min(vw, 430);
-    const editorLeft = (vw - editorW) / 2;
-    const tx = (cardRect.left + cardRect.width  / 2) - (editorLeft + editorW / 2);
-    const ty = (cardRect.top  + cardRect.height / 2) - vh / 2;
-    const sx = cardRect.width  / editorW;
-    const sy = cardRect.height / vh;
-    return {
-      '--tx': `${tx}px`,
-      '--ty': `${ty}px`,
-      '--sx': sx,
-      '--sy': sy,
-    };
-  }, [cardRect]);
+  useHardwareBack(handleClose);
+
+  const handleForceClose = async () => {
+    clearTimeout(saveTO.current);
+    const isEmpty = !titleVal.current.trim() && !accountIdVal.current.trim() && !passwordVal.current.trim() && !notesVal.current.trim();
+    if (isEmpty) { onDelete(); return; }
+    if (isDirty.current) await doSave();
+    onClose(); // instant, no animation delay
+  };
 
   return (
-    <div 
-      className="fixed inset-0 z-[200] flex flex-col max-w-[430px] mx-auto origin-center bg-gradient-to-b from-[#7b2fff] via-[#9b44ff_40%] via-[#b06ef3_70%] to-[#d49dff] animate-expandFromCard" 
-      style={animStyle}
-    >
-      <div className="flex items-center px-4 pt-4 pb-[14px] gap-3 shrink-0">
-        <button 
-          className="w-[38px] h-[38px] rounded-full bg-white/20 border border-white/35 text-white flex items-center justify-center cursor-pointer transition-colors backdrop-blur-md active:bg-white/30 shrink-0 hover:bg-white/25"
-          onClick={handleClose}
-        >
-          <ArrowLeft size={20} strokeWidth={2.5} />
-        </button>
-        <span className="text-[13px] font-semibold bg-white/20 text-white rounded-full h-[38px] px-[14px] inline-flex items-center border border-white/35 uppercase tracking-wide backdrop-blur-md">
-          {category}
-        </span>
-        <div className="flex gap-2 ml-auto shrink-0">
-          <button 
-            className="w-[38px] h-[38px] rounded-full bg-red-400/20 border border-red-400/35 text-[#ff6b6b] flex items-center justify-center cursor-pointer transition-colors backdrop-blur-md active:bg-red-400/35 hover:bg-red-400/25 shrink-0" 
-            onClick={handleDelete} 
+    <>
+      {/* Invisible Backing with Fade */}
+      <div 
+        className="fixed inset-0 z-[190] transition-opacity duration-300"
+        style={{ 
+          background: 'rgba(0,0,0,0.3)',
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? 'auto' : 'none'
+        }}
+        onClick={handleClose}
+      />
+      
+      {/* Modal Container */}
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center pointer-events-none">
+        <div className="w-full max-w-[430px] h-full flex flex-col p-3">
+          <div 
+            className="relative w-full flex-1 flex flex-col pointer-events-auto overflow-hidden glass-pill-card" 
+            style={{
+              borderRadius: '16px',
+              transform: isOpen ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(40px)',
+              opacity: isOpen ? 1 : 0,
+              transition: 'transform 0.45s cubic-bezier(0.5, 1.5, 0.5, 1), opacity 0.35s ease-out',
+              willChange: 'transform, opacity'
+            }}
           >
-            <Trash2 size={18} strokeWidth={2.5} />
-          </button>
-        </div>
-      </div>
+            <div className="absolute inset-0 flex flex-col w-full h-full">
+              
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+                
+                {/* Title Row */}
+                <div className="flex items-center justify-between gap-3 w-full min-h-[42px]">
+                  <textarea
+                    ref={titleElRef}
+                    className="font-serif text-[28px] border-none bg-transparent text-white outline-none flex-1 leading-[1.3] overflow-hidden resize-none caret-white/80 placeholder:text-white/30 pt-0.5"
+                    placeholder="Account/Site Name"
+                    value={title}
+                    rows={1}
+                    onChange={handleTitleChange}
+                  />
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <button 
+                      className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
+                      onClick={handleDelete} 
+                      title="Delete account"
+                    >
+                      <Trash2 size={18} className="text-[#ff6b6b]" strokeWidth={2.5} />
+                    </button>
+                    <button 
+                      className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
+                      onClick={handleForceClose} 
+                      title="Close account"
+                    >
+                      <X size={20} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pt-2.5 pb-[30px] flex flex-col gap-3.5 [&::-webkit-scrollbar]:hidden">
-        <textarea
-          ref={titleElRef}
-          className="font-serif text-[28px] border-none bg-transparent text-white outline-none w-full leading-[1.3] overflow-hidden resize-none caret-white/80 placeholder:text-white/30"
-          placeholder="Account/Site Name"
-          value={title}
-          rows={1}
-          onChange={handleTitleChange}
-        />
-        <div className="h-px bg-white/20 shrink-0 w-full" />
-        
-        <div className="flex flex-col gap-5 mt-2">
-          <div>
-            <label className="text-[15px] font-semibold text-white/80 mb-2 block">Username / Account ID</label>
-            <input
-              type="text"
-              className="w-full bg-white/10 border-[1.5px] border-white/30 rounded-2xl px-4 py-3 text-white outline-none focus:border-white/70 transition-colors placeholder:text-white/30 backdrop-blur-sm"
-              placeholder="email@example.com"
-              value={accountId}
-              onChange={handleAccountIdChange}
-            />
-          </div>
-          <div>
-            <label className="text-[15px] font-semibold text-white/80 mb-2 block">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="w-full bg-white/10 border-[1.5px] border-white/30 rounded-2xl pl-4 pr-12 py-3 text-white outline-none focus:border-white/70 transition-colors placeholder:text-white/30 backdrop-blur-sm"
-                placeholder="Secret password"
-                value={accountPassword}
-                onChange={handlePasswordChange}
-              />
-              <button 
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+                <div className="h-px bg-white/20 shrink-0 w-full" />
+                
+                <div className="flex flex-col gap-4 mt-2 pb-[30px]">
+                  <div>
+                    <label className="text-[12px] font-semibold text-white/50 uppercase tracking-wider mb-2 block">Username / Account ID</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-[10px] bg-white/10 border-none rounded-[19px] text-white placeholder:text-white/40 outline-none text-[15px] shadow-sm focus:bg-white/20 transition-colors"
+                      placeholder="email@example.com"
+                      value={accountId}
+                      onChange={handleAccountIdChange}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[12px] font-semibold text-white/50 uppercase tracking-wider mb-2 block">Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="w-full pl-4 pr-12 py-[10px] bg-white/10 border-none rounded-[19px] text-white placeholder:text-white/40 outline-none text-[15px] shadow-sm focus:bg-white/20 transition-colors"
+                        placeholder="Secret password"
+                        value={accountPassword}
+                        onChange={handlePasswordChange}
+                      />
+                      <button 
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[12px] font-semibold text-white/50 uppercase tracking-wider mb-2 block">Notes</label>
+                    <textarea
+                      className="w-full min-h-[80px] px-4 py-[10px] bg-white/10 border-none rounded-[19px] text-white placeholder:text-white/40 outline-none text-[15px] shadow-sm focus:bg-white/20 transition-colors resize-none overflow-hidden"
+                      placeholder="Additional information..."
+                      value={notes}
+                      onChange={handleNotesChange}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Saved toast */}
+              <div className={cn(
+                "absolute bottom-9 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md text-white text-[12px] py-1.5 px-5 rounded-full border border-white/30 transition-opacity duration-300 pointer-events-none whitespace-nowrap",
+                saved ? "opacity-100" : "opacity-0"
+              )}>
+                ✓ Saved
+              </div>
             </div>
           </div>
-          <div>
-            <label className="text-[15px] font-semibold text-white/80 mb-2 block">Notes</label>
-            <textarea
-              className="w-full bg-white/10 border-[1.5px] border-white/30 rounded-2xl px-4 py-3 text-white outline-none focus:border-white/70 transition-colors placeholder:text-white/30 backdrop-blur-sm resize-none min-h-[100px]"
-              placeholder="Additional information..."
-              value={notes}
-              onChange={handleNotesChange}
-            />
-          </div>
         </div>
       </div>
-
-      <div className={cn(
-        "absolute bottom-9 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md text-white text-[12px] py-1.5 px-5 rounded-full border border-white/30 transition-opacity duration-300 pointer-events-none whitespace-nowrap",
-        saved ? "opacity-100" : "opacity-0"
-      )}>
-        ✓ Saved
-      </div>
-    </div>
+    </>
   );
 }
