@@ -338,9 +338,9 @@ function EntryRow({ entry,isEditing, selectionMode, selected, onActivate, onLong
           )}>
             {isPositive ? '+' : '−'}₹{amt.toLocaleString()}
           </span>
-          {entry.createdAt && (
+          {(entry.updatedAt || entry.createdAt) && (
             <span className="text-[10.5px] text-white/35 mt-0.5">
-              {formatDateTime(entry.createdAt)}
+              {formatDateTime(entry.updatedAt || entry.createdAt)}
             </span>
           )}
         </div>
@@ -408,6 +408,23 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
 
   const selectionMode = selectedEntryIds.size > 0;
 
+  // Track visual viewport to lift buttons above mobile keyboard
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  useEffect(() => {
+    if (!window.visualViewport) return;
+    const handleViewportChange = () => {
+      // Calculate how much the visual viewport has shrunk from the window innerHeight
+      const offset = Math.max(0, window.innerHeight - window.visualViewport.height);
+      setKeyboardOffset(offset);
+    };
+    window.visualViewport.addEventListener('resize', handleViewportChange);
+    window.visualViewport.addEventListener('scroll', handleViewportChange); // iOS fires scroll during keyboard animation
+    return () => {
+      window.visualViewport.removeEventListener('resize', handleViewportChange);
+      window.visualViewport.removeEventListener('scroll', handleViewportChange);
+    };
+  }, []);
+
   // Always-current refs so callbacks never capture stale state
   const titleVal        = useRef(title);
   const initialTotalVal = useRef(initialTotal);
@@ -446,13 +463,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
 
   const scheduleSave = useCallback(() => {
     isDirty.current = true;
-    clearTimeout(saveTO.current);
-    saveTO.current = setTimeout(async () => {
-      await doSave();
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
-    }, 800);
-  }, [doSave]);
+  }, []);
 
   const handleTitleChange = (e) => {
     titleVal.current = e.target.value;
@@ -469,7 +480,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
   };
 
   const updateEntry = (id, updates) => {
-    const newEntries = entriesVal.current.map(e => e.tempId === id ? { ...e, ...updates } : e);
+    const newEntries = entriesVal.current.map(e => e.tempId === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e);
     entriesVal.current = newEntries;
     setEntries(newEntries);
     scheduleSave();
@@ -730,13 +741,14 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
               {selectionMode && (
                 <div style={{
                   position: 'absolute',
-                  bottom: 24,
+                  bottom: 24 + keyboardOffset,
                   left: '50%',
                   transform: 'translateX(-50%)',
                   zIndex: 220,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
+                  transition: 'bottom 0.1s ease-out'
                 }}>
                   {/* Label pill */}
                   <div style={{
@@ -796,7 +808,8 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
               {/* Floating Add Button */}
               {!selectionMode && (
                 <button
-                  className="absolute bottom-6 right-6 w-[62px] h-[62px] rounded-full flex items-center justify-center glass-pill-card transition-all active:scale-90 shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-[210] shrink-0"
+                  className="absolute right-6 w-[62px] h-[62px] rounded-full flex items-center justify-center glass-pill-card transition-all active:scale-90 shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-[210] shrink-0"
+                  style={{ bottom: 24 + keyboardOffset, transition: 'bottom 0.1s ease-out' }}
                   onClick={addEntry}
                   title="Add Entry"
                 >
@@ -805,10 +818,13 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
               )}
 
               {/* Saved toast */}
-              <div className={cn(
-                "absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md text-white text-[12px] py-1.5 px-5 rounded-full border border-white/30 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-[210]",
-                saved ? "opacity-100" : "opacity-0"
-              )}>
+              <div 
+                className={cn(
+                  "absolute left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md text-white text-[12px] py-1.5 px-5 rounded-full border border-white/30 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-[210]",
+                  saved ? "opacity-100" : "opacity-0"
+                )}
+                style={{ bottom: 32 + keyboardOffset, transition: saved ? 'bottom 0.1s ease-out' : 'bottom 0.1s ease-out, opacity 0.3s' }}
+              >
                 ✓ Saved
               </div>
             </div>

@@ -97,13 +97,7 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
 
   const scheduleSave = useCallback(() => {
     isDirty.current = true;
-    clearTimeout(saveTO.current);
-    saveTO.current = setTimeout(async () => {
-      await doSave();
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
-    }, 800);
-  }, [doSave]);
+  }, []);
 
   const handleTitleChange = (e) => {
     titleVal.current = e.target.value;

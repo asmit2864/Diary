@@ -53,6 +53,7 @@ router.put('/:id', async (req, res) => {
         body: req.body.body,
         pinned: req.body.pinned,
         archived: req.body.archived,
+        updatedAt: Date.now()
       },
       { new: true, runValidators: true }
     );

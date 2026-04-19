@@ -88,7 +88,7 @@ export default function ExpenseCard({ expense, onClick, selectionMode, selected,
           {expense.title || 'Untitled Expense'}
         </div>
         <span className="text-[11px] text-white/40 shrink-0 mt-[2px]">
-          {formatDateTime(expense.createdAt)}
+          {formatDateTime(expense.updatedAt || expense.createdAt)}
         </span>
       </div>
       

@@ -215,6 +215,7 @@ export default function App() {
         selectedCount={selectedIds.size}
         onDeleteSelected={handleDeleteSelected}
         onCancelSelection={handleCancelSelection}
+        vaultLocked={showVaultLogin}
       />
 
       {editorState && editorState.category === 'Notes' && (

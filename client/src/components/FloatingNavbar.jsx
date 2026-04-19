@@ -54,6 +54,7 @@ export default function FloatingNavbar({
   selectedCount,
   onDeleteSelected,
   onCancelSelection,
+  vaultLocked,
 }) {
   const activeIdx    = TABS.indexOf(activeTab);
   const prevIdxRef   = useRef(activeIdx);
@@ -166,6 +167,7 @@ export default function FloatingNavbar({
         }
         .gn-add:hover  { scale: 1.09; }
         .gn-add:active { scale: 0.90; }
+        .gn-add:disabled { scale: 1 !important; opacity: 0.38; cursor: default; pointer-events: none; }
 
         .gn-del {
           border: none;
@@ -338,9 +340,13 @@ export default function FloatingNavbar({
             backdropFilter: 'blur(14px) saturate(180%)',
             WebkitBackdropFilter: 'blur(14px) saturate(180%)',
             boxShadow: PILL_SHADOW,
+            opacity: vaultLocked ? 0.38 : 1,
+            cursor: vaultLocked ? 'default' : 'pointer',
           }}
-          onClick={() => onAdd(activeTab)}
+          onClick={vaultLocked ? undefined : () => onAdd(activeTab)}
+          disabled={vaultLocked}
           aria-label="Add new"
+          aria-disabled={vaultLocked}
         >
           <Plus size={25} strokeWidth={2.5} />
         </button>

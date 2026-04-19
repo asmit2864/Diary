@@ -44,13 +44,7 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
   // Debounced auto-save called directly from onChange
   const scheduleSave = useCallback(() => {
     isDirty.current = true;
-    clearTimeout(saveTO.current);
-    saveTO.current = setTimeout(async () => {
-      await doSave();
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
-    }, 800);
-  }, [doSave]);
+  }, []);
 
   // onChange handlers: update ref + state + kick off save
   const handleTitleChange = (e) => {
