@@ -55,7 +55,12 @@
   }
 
   html,
-  body,
+  body {
+    height: 100%;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
   #root {
     height: 100dvh;
     overflow: hidden;
@@ -65,6 +70,7 @@
     @apply font-sans;
     position: relative;
     color: #fff;
+    background-color: #0a0a12;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -73,7 +79,10 @@
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
+    top: -env(safe-area-inset-top, 0px);
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: -2;
     transition: background-position 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     /* Default / Notes: bg-image-notes.jpg */
@@ -122,6 +131,7 @@
     @apply flex flex-col max-w-[430px] mx-auto relative;
     overflow: hidden;
     height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   /* Scrollbar */
