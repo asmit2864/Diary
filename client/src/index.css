@@ -435,11 +435,11 @@
 
 .liquid-toggle .indicator--masked .mask {
   position: absolute;
-  height: calc(100% - (2 * var(--border)));
-  width: calc(60% - (2 * var(--border)));
+  height: calc(100% - (2 * var(--toggle-border)));
+  width: calc(60% - (2 * var(--toggle-border)));
   top: 50%;
   background: #000;
-  left: var(--border);
+  left: var(--toggle-border);
   border-radius: 100px;
 }
 
@@ -468,8 +468,8 @@
 
 .liquid-toggle .liquids .liquid__track {
   content: '';
-  height: calc((var(--height) * 1px) - (0 * var(--border)));
-  width: calc((var(--width) * 1px) - (0 * var(--border)));
+  height: calc(var(--height) * 1px);
+  width: calc(var(--width) * 1px);
   background: var(--checked);
   border-radius: 100px;
   position: absolute;
@@ -478,12 +478,12 @@
 
 .liquid-toggle .indicator__liquid {
   position: absolute;
-  height: calc(100% - (2 * var(--border)));
-  width: calc(60% - (2 * var(--border)));
+  height: calc(100% - (2 * var(--toggle-border)));
+  width: calc(60% - (2 * var(--toggle-border)));
   container-type: inline-size;
   top: 50%;
   background: #0000;
-  left: var(--border);
+  left: var(--toggle-border);
   border-radius: 100px;
 }
 

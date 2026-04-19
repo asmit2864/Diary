@@ -484,18 +484,18 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
     scheduleSave();
   };
 
-  const deleteEntry = (id) => {
+  const deleteEntry = useCallback((id) => {
     const newEntries = entriesVal.current.filter(e => e.tempId !== id);
     entriesVal.current = newEntries;
     setEntries(newEntries);
-    if (activeEntryId === id) setActiveEntryId(null);
+    setActiveEntryId(prev => (prev === id ? null : prev));
     setSelectedEntryIds(prev => {
       const next = new Set(prev);
       next.delete(id);
       return next;
     });
     scheduleSave();
-  };
+  }, [scheduleSave]);
 
   const handleEntryLongPress = (id) => {
     if (activeEntryId) return; // Don't allow selection while editing
