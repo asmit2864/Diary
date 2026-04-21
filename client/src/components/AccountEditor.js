@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Trash2, Eye, EyeOff, X } from 'lucide-react';
+import { Trash2, Eye, EyeOff, X, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useHardwareBack } from '../hooks/useHardwareBack';
 import { encryptText } from '../utils/crypto';
@@ -11,6 +11,7 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
   const [notes, setNotes] = useState(account?.notes || '');
   const [saved, setSaved] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const titleVal  = useRef(account?.title || '');
   const accountIdVal = useRef(account?.accountId || '');
@@ -93,13 +94,17 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
   }, []);
 
   const handleClose = async () => {
+    if (isSaving) return;
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && !accountIdVal.current.trim() && !passwordVal.current.trim() && !notesVal.current.trim();
     if (isEmpty) {
       onDelete();
       return;
     }
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     
     setIsOpen(false);
     setTimeout(() => {
@@ -115,10 +120,14 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
   useHardwareBack(handleClose);
 
   const handleForceClose = async () => {
+    if (isSaving) return;
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && !accountIdVal.current.trim() && !passwordVal.current.trim() && !notesVal.current.trim();
     if (isEmpty) { onDelete(); return; }
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     onClose(); // instant, no animation delay
   };
 
@@ -165,18 +174,22 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
                   />
                   <div className="flex items-center gap-2.5 shrink-0">
                     <button 
-                      className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
-                      onClick={handleDelete} 
+                      className={cn("w-[42px] h-[42px] rounded-full flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                        isSaving ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"
+                      )}
+                      onClick={isSaving ? undefined : handleDelete} 
                       title="Delete account"
                     >
                       <Trash2 size={18} className="text-[#ff6b6b]" strokeWidth={2.5} />
                     </button>
                     <button 
-                      className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
-                      onClick={handleForceClose} 
+                      className={cn("w-[42px] h-[42px] rounded-full text-white flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                        isSaving ? "cursor-not-allowed" : "cursor-pointer active:scale-95"
+                      )}
+                      onClick={isSaving ? undefined : handleForceClose} 
                       title="Close account"
                     >
-                      <X size={20} strokeWidth={2.5} />
+                      {isSaving ? <Loader2 size={20} className="animate-spin text-white/80" /> : <X size={20} strokeWidth={2.5} />}
                     </button>
                   </div>
                 </div>

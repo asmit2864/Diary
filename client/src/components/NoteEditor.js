@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Trash2, X } from 'lucide-react';
+import { Trash2, X, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useHardwareBack } from '../hooks/useHardwareBack';
 
@@ -7,6 +7,8 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
   const [title, setTitle] = useState(note?.title || '');
   const [body, setBody]   = useState(note?.body  || '');
   const [saved, setSaved] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Always-current refs so callbacks never capture stale state
   const titleVal  = useRef(note?.title || '');
@@ -61,7 +63,7 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
     scheduleSave();
   };
 
-  const [isOpen, setIsOpen] = useState(false);
+  
   
   useEffect(() => {
     // Small delay to ensure initial render is registered before triggering CSS transition
@@ -72,6 +74,7 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
   }, []);
 
   const handleClose = async () => {
+    if (isSaving) return;
     clearTimeout(saveTO.current);
     
     const isEmpty = 
@@ -83,7 +86,10 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
       return;
     }
 
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     
     setIsOpen(false);
     
@@ -93,10 +99,14 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
   };
 
   const handleForceClose = async () => {
+    if (isSaving) return;
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && !bodyVal.current.trim();
     if (isEmpty) { onDelete(); return; }
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     onClose(); // instant, no animation delay
   };
 
@@ -152,18 +162,22 @@ export default function NoteEditor({ note, category, cardRect, onClose, onSave, 
           />
           <div className="flex items-center gap-2.5 shrink-0">
             <button 
-              className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
-              onClick={handleDelete} 
+              className={cn("w-[42px] h-[42px] rounded-full flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                isSaving ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"
+              )}
+              onClick={isSaving ? undefined : handleDelete} 
               title="Delete note"
             >
               <Trash2 size={18} className="text-[#ff6b6b]" strokeWidth={2.5} />
             </button>
             <button 
-              className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
-              onClick={handleForceClose} 
+              className={cn("w-[42px] h-[42px] rounded-full text-white flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                isSaving ? "cursor-not-allowed" : "cursor-pointer active:scale-95"
+              )}
+              onClick={isSaving ? undefined : handleForceClose} 
               title="Close note"
             >
-              <X size={20} strokeWidth={2.5} />
+              {isSaving ? <Loader2 size={20} className="animate-spin text-white/80" /> : <X size={20} strokeWidth={2.5} />}
             </button>
           </div>
         </div>

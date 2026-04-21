@@ -104,24 +104,42 @@ export default function VaultLogin({ user, onUnlock }) {
             {isSetup ? 'Secure Your Vault' : 'Unlock Vault'}
           </h2>
           <p className={cn("text-[12px] mt-1 transition-colors duration-200", error ? 'text-red-400 font-semibold' : 'text-white/50')}>
-            {error || (isSetup ? 'Create a 6-digit PIN to protect your vault.' : 'Enter your 6-digit PIN.')}
+            {loading ? (isSetup ? 'Securing your vault...' : 'Decrypting your vault...') : (error || (isSetup ? 'Create a 6-digit PIN to protect your vault.' : 'Enter your 6-digit PIN.'))}
           </p>
         </div>
       </div>
 
-      {/* ── PIN dots — perfectly centered between top section and numpad ── */}
-      <div className="shrink-0 flex gap-3">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "w-4 h-4 rounded-full transition-all duration-200",
-              i < pin.length
-                ? "bg-white scale-100 shadow-[0_0_10px_rgba(255,255,255,0.85)]"
-                : "bg-white/15 scale-90"
-            )}
-          />
-        ))}
+      <style>{`
+        @keyframes smoothWave {
+          0%, 100% { transform: translateY(0); opacity: 0.4; }
+          50% { transform: translateY(-4px); opacity: 1; }
+        }
+        .dot-wave {
+          animation: smoothWave 1.2s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* ── PIN dots / Loader — perfectly centered between top section and numpad ── */}
+      <div className="shrink-0 flex gap-3 h-4 items-center justify-center min-w-[120px]">
+        {loading ? (
+          <div className="flex gap-2.5 items-center justify-center h-full">
+            <div className="w-2.5 h-2.5 bg-white rounded-full dot-wave" style={{ animationDelay: '0ms' }} />
+            <div className="w-2.5 h-2.5 bg-white rounded-full dot-wave" style={{ animationDelay: '150ms' }} />
+            <div className="w-2.5 h-2.5 bg-white rounded-full dot-wave" style={{ animationDelay: '300ms' }} />
+          </div>
+        ) : (
+          [...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "w-4 h-4 rounded-full transition-all duration-200",
+                i < pin.length
+                  ? "bg-white scale-100 shadow-[0_0_10px_rgba(255,255,255,0.85)]"
+                  : "bg-white/15 scale-90"
+              )}
+            />
+          ))
+        )}
       </div>
 
       {/* ── Numpad — explicit CSS min() sizing, never overflows ── */}
@@ -138,6 +156,7 @@ export default function VaultLogin({ user, onUnlock }) {
           <button
             key={num}
             onClick={() => handleKeypad(num.toString())}
+            disabled={loading}
             style={{
               width: BTN,
               height: BTN,
@@ -159,6 +178,7 @@ export default function VaultLogin({ user, onUnlock }) {
         <div style={{ width: BTN, height: BTN }} />
         <button
           onClick={() => handleKeypad('0')}
+          disabled={loading}
           style={{
             width: BTN,
             height: BTN,
@@ -176,7 +196,7 @@ export default function VaultLogin({ user, onUnlock }) {
         </button>
         <button
           onClick={handleBackspace}
-          disabled={pin.length === 0}
+          disabled={pin.length === 0 || loading}
           style={{ width: BTN, height: BTN, borderRadius: '50%', flexShrink: 0 }}
           className="text-white/60 flex items-center justify-center transition-all duration-150 hover:bg-white/10 active:scale-90 disabled:opacity-20"
         >

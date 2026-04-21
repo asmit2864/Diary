@@ -11,6 +11,7 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
   const [saved, setSaved] = useState(false);
   
   const [uploading, setUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [localImageUrl, setLocalImageUrl] = useState(null);
   const [documentType, setDocumentType] = useState(null);
   const [imageLoading, setImageLoading] = useState(!!note?.documentUrl);
@@ -182,8 +183,8 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
   }, []);
 
   const handleClose = async () => {
-    if (uploading) {
-      alert("Please wait while your document is securely encrypted and uploaded...");
+    if (uploading || isSaving) {
+      if (uploading) alert("Please wait while your document is securely encrypted and uploaded...");
       return false; // explicitly signal to useHardwareBack to rebuild the trap!
     }
     clearTimeout(saveTO.current);
@@ -192,7 +193,10 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
       onDelete();
       return;
     }
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     
     setIsOpen(false);
     setTimeout(() => {
@@ -201,14 +205,17 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
   };
 
   const handleForceClose = async () => {
-    if (uploading) {
-      alert("Please wait while your document is securely encrypted and uploaded...");
+    if (uploading || isSaving) {
+      if (uploading) alert("Please wait while your document is securely encrypted and uploaded...");
       return;
     }
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && !bodyVal.current.trim() && !documentUrlVal.current;
     if (isEmpty) { onDelete(); return; }
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     onClose(); // instant, no animation delay
   };
 
@@ -282,18 +289,22 @@ export default function DocumentEditor({ note, category, cardRect, onClose, onSa
                       </>
                     )}
                     <button 
-                      className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
-                      onClick={handleDelete} 
+                      className={cn("w-[42px] h-[42px] rounded-full flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                        isSaving ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"
+                      )}
+                      onClick={isSaving ? undefined : handleDelete} 
                       title="Delete document"
                     >
                       <Trash2 size={18} className="text-[#ff6b6b]" strokeWidth={2.5} />
                     </button>
                     <button 
-                      className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card" 
-                      onClick={handleForceClose} 
+                      className={cn("w-[42px] h-[42px] rounded-full text-white flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                        isSaving ? "cursor-not-allowed" : "cursor-pointer active:scale-95"
+                      )}
+                      onClick={isSaving ? undefined : handleForceClose} 
                       title="Close document"
                     >
-                      <X size={20} strokeWidth={2.5} />
+                      {isSaving ? <Loader2 size={20} className="animate-spin text-white/80" /> : <X size={20} strokeWidth={2.5} />}
                     </button>
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Trash2, Plus } from 'lucide-react';
+import { X, Trash2, Plus, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useHardwareBack } from '../hooks/useHardwareBack';
 import gsap from 'gsap';
@@ -405,6 +405,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
   const [selectedEntryIds, setSelectedEntryIds] = useState(new Set());
   const [saved, setSaved] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const selectionMode = selectedEntryIds.size > 0;
 
@@ -453,7 +454,11 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
   }, []);
 
   const doSave = useCallback(() => {
-    const cleanEntries = entriesVal.current.map(({ tempId, ...rest }) => rest);
+    const validEntries = entriesVal.current.filter(e => String(e.amount).trim() !== '' || String(e.reason).trim() !== '');
+    const cleanEntries = validEntries.map(({ tempId, ...rest }) => ({ 
+      ...rest, 
+      amount: Number(rest.amount) || 0 
+    }));
     return onSave({
       title: titleVal.current,
       initialTotal: initialTotalVal.current,
@@ -548,13 +553,17 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
   }, [scheduleSave, deleteEntry]);
 
   const handleClose = useCallback(async () => {
+    if (isSaving) return;
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && entriesVal.current.length === 0;
     if (isEmpty) { onDelete(); return; }
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     setIsOpen(false);
     setTimeout(() => onClose(), 400);
-  }, [onDelete, onClose, doSave]);
+  }, [onDelete, onClose, doSave, isSaving]);
 
   useHardwareBack(handleClose);
 
@@ -564,10 +573,14 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
   };
 
   const handleForceClose = async () => {
+    if (isSaving) return;
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && entriesVal.current.length === 0;
     if (isEmpty) { onDelete(); return; }
-    if (isDirty.current) await doSave();
+    if (isDirty.current) {
+      setIsSaving(true);
+      try { await doSave(); } catch (e) { console.error(e); }
+    }
     onClose(); // instant, no animation delay
   };
 
@@ -652,18 +665,22 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
                   />
                   <div className="flex items-center gap-2.5 shrink-0">
                     <button
-                      className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card"
-                      onClick={handleDelete}
+                      className={cn("w-[42px] h-[42px] rounded-full flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                        isSaving ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"
+                      )}
+                      onClick={isSaving ? undefined : handleDelete}
                       title="Delete expense"
                     >
                       <Trash2 size={18} className="text-[#ff6b6b]" strokeWidth={2.5} />
                     </button>
                     <button
-                      className="w-[42px] h-[42px] rounded-full text-white flex items-center justify-center cursor-pointer transition-transform active:scale-95 shrink-0 glass-pill-card"
-                      onClick={handleForceClose}
+                      className={cn("w-[42px] h-[42px] rounded-full text-white flex items-center justify-center transition-transform shrink-0 glass-pill-card",
+                        isSaving ? "cursor-not-allowed" : "cursor-pointer active:scale-95"
+                      )}
+                      onClick={isSaving ? undefined : handleForceClose}
                       title="Close expense"
                     >
-                      <X size={20} strokeWidth={2.5} />
+                      {isSaving ? <Loader2 size={20} className="animate-spin text-white/80" /> : <X size={20} strokeWidth={2.5} />}
                     </button>
                   </div>
                 </div>
