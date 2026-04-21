@@ -403,7 +403,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
   });
   const [activeEntryId, setActiveEntryId] = useState(null);
   const [selectedEntryIds, setSelectedEntryIds] = useState(new Set());
-  const [saved, setSaved] = useState(false);
+  const saved = false;
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 

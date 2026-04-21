@@ -6,7 +6,7 @@ import { useHardwareBack } from '../hooks/useHardwareBack';
 export default function NoteEditor({ note, category, cardRect, onClose, onSave, onDelete }) {
   const [title, setTitle] = useState(note?.title || '');
   const [body, setBody]   = useState(note?.body  || '');
-  const [saved, setSaved] = useState(false);
+  const saved = false;
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 

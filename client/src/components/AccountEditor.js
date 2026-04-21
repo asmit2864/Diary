@@ -9,7 +9,7 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
   const [accountId, setAccountId] = useState(account?.accountId || '');
   const [accountPassword, setAccountPassword] = useState(account?.accountPassword || '');
   const [notes, setNotes] = useState(account?.notes || '');
-  const [saved, setSaved] = useState(false);
+  const saved = false;
   const [showPassword, setShowPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 

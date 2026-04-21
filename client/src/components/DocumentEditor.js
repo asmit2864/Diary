@@ -8,7 +8,7 @@ import { uploadEncryptedBlobToCloudinary, downloadAndDecryptFile, hasCachedFile,
 export default function DocumentEditor({ note, category, cardRect, onClose, onSave, onDelete, vaultKey }) {
   const [title, setTitle] = useState(note?.title || '');
   const [body, setBody]   = useState(note?.body  || '');
-  const [saved, setSaved] = useState(false);
+  const saved = false;
   
   const [uploading, setUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
