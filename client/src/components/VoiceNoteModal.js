@@ -40,6 +40,7 @@ export default function VoiceNoteModal({ isOpen, onClose, onParsed }) {
     }, 3000); // 3 seconds of silence = automatic processing
 
     return () => clearTimeout(silenceTimerRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript, interimTranscript, isListening]);
 
   const handleProcessVoice = async () => {
