@@ -449,7 +449,9 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
   }, [expense, category]);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => setIsOpen(true));
+    const frame = requestAnimationFrame(() => {
+      setIsOpen(true);
+    });
     return () => cancelAnimationFrame(frame);
   }, []);
 
@@ -552,7 +554,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
     }
   }, [scheduleSave, deleteEntry]);
 
-  const handleClose = useCallback(async () => {
+  const handleClose = async () => {
     if (isSaving) return;
     clearTimeout(saveTO.current);
     const isEmpty = !titleVal.current.trim() && entriesVal.current.length === 0;
@@ -563,7 +565,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
     }
     setIsOpen(false);
     setTimeout(() => onClose(), 400);
-  }, [onDelete, onClose, doSave, isSaving]);
+  };
 
   useHardwareBack(handleClose);
 
@@ -640,7 +642,7 @@ export default function ExpenseEditor({ note: expense, category, cardRect, onClo
             className="relative w-full flex-1 flex flex-col pointer-events-auto overflow-hidden glass-pill-card"
             style={{
               borderRadius: '16px',
-              transform: isOpen ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(40px)',
+              transform: isOpen ? 'translate3d(0, 0, 0)' : 'translate3d(0, 40px, 0)',
               opacity: isOpen ? 1 : 0,
               transition: 'transform 0.45s cubic-bezier(0.5, 1.5, 0.5, 1), opacity 0.35s ease-out',
               willChange: 'transform, opacity'

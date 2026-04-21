@@ -86,17 +86,19 @@ export default function App() {
     setSelectedIds(new Set());
   };
 
-  const handleFabSelect = async (category) => {
-    try {
-      const newNote = await addNote({ title: '', body: '', category });
-      setEditorState({ note: newNote, category, rect: null });
-    } catch (e) { console.error(e); }
+  const handleFabSelect = (category) => {
+    setEditorState({ note: { _id: null, title: '', body: '' }, category, rect: null });
   };
 
-  const handleSave = async ({ title, body, accountId, accountPassword, notes: accNotes, documentUrl, entries, initialTotal }) => {
-    if (!editorState?.note?._id) return;
+  const handleSave = async (payload) => {
+    if (!editorState) return;
     try {
-      await editNote(editorState.note._id, { title, body, accountId, accountPassword, notes: accNotes, documentUrl, entries, initialTotal, category: editorState.category });
+      const fullPayload = { ...payload, category: editorState.category };
+      if (!editorState.note || !editorState.note._id) {
+        await addNote(fullPayload);
+      } else {
+        await editNote(editorState.note._id, fullPayload);
+      }
     } catch (e) { console.error(e); }
   };
 
@@ -108,9 +110,10 @@ export default function App() {
   };
 
   const handleDelete = async () => {
-    if (!editorState?.note?._id) return;
-    try { await removeNote(editorState.note._id); } catch (e) { console.error(e); }
+    const id = editorState?.note?._id;
     setEditorState(null);
+    if (!id) return;
+    try { await removeNote(id); } catch (e) { console.error(e); }
   };
 
   const handleClose = () => { setEditorState(null); };

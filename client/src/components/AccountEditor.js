@@ -151,7 +151,7 @@ export default function AccountEditor({ note: account, category, cardRect, onClo
             className="relative w-full flex-1 flex flex-col pointer-events-auto overflow-hidden glass-pill-card" 
             style={{
               borderRadius: '16px',
-              transform: isOpen ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(40px)',
+              transform: isOpen ? 'translate3d(0, 0, 0)' : 'translate3d(0, 40px, 0)',
               opacity: isOpen ? 1 : 0,
               transition: 'transform 0.45s cubic-bezier(0.5, 1.5, 0.5, 1), opacity 0.35s ease-out',
               willChange: 'transform, opacity'
