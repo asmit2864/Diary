@@ -13,6 +13,7 @@ import AccountEditor from './components/AccountEditor';
 import ExpenseEditor from './components/ExpenseEditor';
 import AuthPage from './components/AuthPage';
 import VaultLogin from './components/VaultLogin';
+import VoiceNoteModal from './components/VoiceNoteModal';
 import { useNotes } from './hooks/useNotes';
 import { TABS } from './utils/constants';
 
@@ -30,6 +31,7 @@ export default function App() {
   const [editorState, setEditorState] = useState(null);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const selectionMode = selectedIds.size > 0;
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
 
   const [vaultUnlocked, setVaultUnlocked] = useState(false);
   const [vaultKey, setVaultKey] = useState(null);
@@ -88,6 +90,28 @@ export default function App() {
 
   const handleFabSelect = (category) => {
     setEditorState({ note: { _id: null, title: '', body: '' }, category, rect: null });
+  };
+
+  const handleVoiceParsed = async (parsedData) => {
+    try {
+      const itemsText = (parsedData.items || []).map(i => `• ${i}`).join('\n');
+      
+      if (parsedData.action === 'add_to_note') {
+        const existing = (Array.isArray(notes) ? notes : []).find(n => 
+          n.title?.toLowerCase().includes((parsedData.title || '').toLowerCase())
+        );
+        if (existing) {
+          const appendedBody = existing.body ? `${existing.body}\n${itemsText}` : itemsText;
+          await editNote(existing._id, { ...existing, body: appendedBody, category: 'Notes' });
+          return;
+        }
+      }
+      
+      // Fallback or create_note
+      await addNote({ title: parsedData.title || 'Voice Note', body: itemsText, category: 'Notes' });
+    } catch(err) {
+      console.error("Failed to save voice note:", err);
+    }
   };
 
   const handleSave = async (payload) => {
@@ -219,6 +243,13 @@ export default function App() {
         onDeleteSelected={handleDeleteSelected}
         onCancelSelection={handleCancelSelection}
         vaultLocked={showVaultLogin}
+        onMicClick={() => setVoiceModalOpen(true)}
+      />
+
+      <VoiceNoteModal 
+        isOpen={voiceModalOpen} 
+        onClose={() => setVoiceModalOpen(false)} 
+        onParsed={handleVoiceParsed} 
       />
 
       {editorState && editorState.category === 'Notes' && (

@@ -11,6 +11,7 @@ const documentsRouter = require('./routes/documents');
 const accountsRouter  = require('./routes/accounts');
 const expensesRouter  = require('./routes/expenses');
 const authRouter     = require('./routes/auth');
+const voiceRouter    = require('./routes/voice');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,6 +49,7 @@ app.use('/api/notes', notesRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/accounts', accountsRouter);
 app.use('/api/expenses', expensesRouter);
+app.use('/api/voice', voiceRouter);
 
 // Serve React build
 const buildDir = path.resolve(__dirname, '../client/build');

@@ -8,7 +8,21 @@ export function useNotes(category, vaultKey) {
   const [error, setError] = useState(null);
 
   const decryptItem = async (item, targetCategory = category) => {
-    if (!vaultKey) return item;
+    if (!vaultKey) {
+      if (targetCategory === 'Accounts' || targetCategory === 'Documents') {
+        // Return a visually clean placeholder so we never flash raw AES-GCM output
+        return {
+          ...item,
+          accountId: '••••••••',
+          accountPassword: '••••••••',
+          notes: '••••••••',
+          title: '••••••••',
+          body: '••••••••',
+          documentUrl: ''
+        };
+      }
+      return item;
+    }
     try {
       const dec = { ...item, category: targetCategory };
       if (targetCategory === 'Accounts') {

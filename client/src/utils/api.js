@@ -121,3 +121,15 @@ export const deleteNote = async (id, category) => {
   if (!res.ok) throw new Error('Failed to delete item');
   return res.json();
 };
+
+export const parseVoiceNote = async (text) => {
+  const res = await fetch(`${BACKEND_URI}/api/voice/parse`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ text }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to parse voice note');
+  return data;
+};

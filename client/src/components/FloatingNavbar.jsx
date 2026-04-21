@@ -1,5 +1,5 @@
 import React, { useRef, useLayoutEffect } from "react";
-import { Pencil, Shield, File, IndianRupee, Plus, X, Trash2 } from "lucide-react";
+import { Pencil, Shield, File, IndianRupee, Plus, X, Trash2, Mic } from "lucide-react";
 
 const TABS = ['Notes', 'Expenses', 'Documents', 'Accounts'];
 
@@ -55,6 +55,7 @@ export default function FloatingNavbar({
   onDeleteSelected,
   onCancelSelection,
   vaultLocked,
+  onMicClick,
 }) {
   const activeIdx    = TABS.indexOf(activeTab);
   const prevIdxRef   = useRef(activeIdx);
@@ -349,6 +350,28 @@ export default function FloatingNavbar({
           aria-disabled={vaultLocked}
         >
           <Plus size={25} strokeWidth={2.5} />
+        </button>
+
+        {/* ── Mic button ── */}
+        <button
+          className="gn-add"
+          style={{
+            pointerEvents: 'auto',
+            width: PILL_H,
+            height: PILL_H,
+            backgroundColor: 'color-mix(in srgb, #bbbbbc 12%, transparent)',
+            backdropFilter: 'blur(14px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+            boxShadow: PILL_SHADOW,
+            opacity: vaultLocked ? 0.38 : 1,
+            cursor: vaultLocked ? 'default' : 'pointer',
+          }}
+          onClick={vaultLocked ? undefined : onMicClick}
+          disabled={vaultLocked}
+          aria-label="Voice Add"
+          aria-disabled={vaultLocked}
+        >
+          <Mic size={22} strokeWidth={2.5} />
         </button>
 
       </div>
