@@ -4,12 +4,6 @@
   "description": "A beautiful personal diary and note-taking app",
   "icons": [
     {
-      "src": "logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
       "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192",
